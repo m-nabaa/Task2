@@ -14,7 +14,13 @@ var Root = function (_React$Component) {
 
     var _this = _possibleConstructorReturn(this, (Root.__proto__ || Object.getPrototypeOf(Root)).call(this, props));
 
-    _this.state = { text: '', 'taskcounter': 0, addingText: false, tasks: [{ 'taskText': 'ahmad', 'order': 0, 'clicked': false, 'subTask': [{ 'text': '' }], 'opacity': 1 }] };
+    _this.state = {
+      text: '',
+      taskcounter: 0,
+      addingText: false,
+      itemClicked: false,
+      tasks: [{ taskText: 'ahmad', order: 0, opacity: 1, subTask: [{ text: '' }] }]
+    };
     return _this;
   }
 
@@ -33,7 +39,6 @@ var Root = function (_React$Component) {
     value: function addTask() {
       var allTask = this.state.tasks;
       var taskData = this.state.tasks[0];
-      //console.log(taskData)
       taskData.taskText = this.state.text;
       taskData.order = this.state.tasks.length;
       taskData.clicked = false;
@@ -47,8 +52,6 @@ var Root = function (_React$Component) {
   }, {
     key: 'reOrder',
     value: function reOrder() {
-      console.log('its entering');
-
       $("#downArrow").on('click', function (event) {});
     }
   }, {
@@ -56,6 +59,9 @@ var Root = function (_React$Component) {
     value: function hideAllIcon() {
       $('li').on('click', function (event) {
         console.log("some label clicked");
+        //setState({itemClicked:this.state.itemClicked});
+        //hide icones
+        //display sub task
       });
     }
   }, {
@@ -63,14 +69,13 @@ var Root = function (_React$Component) {
     value: function render() {
       var _this2 = this;
 
-      this.hideAllIcon();
       var taskList = void 0;
       return React.createElement(
         'div',
         { className: 'root' },
         React.createElement(
           'div',
-          { className: 'container-fluid' },
+          { className: 'adding-area container-fluid' },
           React.createElement(
             'div',
             { className: 'row' },
@@ -89,9 +94,9 @@ var Root = function (_React$Component) {
           React.createElement(
             'ul',
             { className: 'list-group itemsList' },
-            taskList = this.state.tasks.map(function (i) {
+            taskList = this.state.tasks.map(function (result, i) {
               i > 0;
-              return React.createElement(Task, { taskcounter: _this2.state.taskcounter, taskDetails: i, className: 'task-item' });
+              return React.createElement(Task, { className: 'task-item', key: i, taskcounter: _this2.state.taskcounter, taskText: result.taskText, order: i, opacity: result.opacity, subTasks: result.subTask });
             })
           )
         )
@@ -111,10 +116,11 @@ var Task = function (_React$Component2) {
     var _this3 = _possibleConstructorReturn(this, (Task.__proto__ || Object.getPrototypeOf(Task)).call(this, props));
 
     _this3.state = {
-      text: _this3.props.taskDetails.taskText,
-      order: _this3.props.taskDetails.order,
-      subTask: _this3.props.taskDetails.subTask,
-      clicked: _this3.props.taskDetails.clicked
+      text: _this3.props.taskText,
+      order: _this3.props.order,
+      subTask: _this3.props.subTask,
+      opacity: _this3.props.opacity,
+      taskcounter: _this3.props.taskCounter
     };
     return _this3;
   }
@@ -154,7 +160,7 @@ var SubTask = function (_React$Component3) {
 
     var _this4 = _possibleConstructorReturn(this, (SubTask.__proto__ || Object.getPrototypeOf(SubTask)).call(this, props));
 
-    _this4.state = { 'text': props.text };
+    _this4.state = { 'text': _this4.props.text };
     return _this4;
   }
 
@@ -163,7 +169,7 @@ var SubTask = function (_React$Component3) {
     value: function render() {
       return React.createElement(
         'li',
-        { className: 'list-group-item list-group-item-action list-group-item list-group-item-danger rounded-0 border-0 items' },
+        { className: 'list-group-item list-group-item-action list-group-item list-group-item-danger rounded-0 border-0 sub-item', style: { opacity: this.props.opacity } },
         this.state.text
       );
     }

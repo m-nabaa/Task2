@@ -1,11 +1,15 @@
 'use strict';
-
 class Root extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {text:'',gitClicked=false,'taskcounter':0,addingText:false,tasks:[{'taskText':'ahmad','order':0,'clicked':false,'subTask':[{'text':''}],'opacity':1}]};
+    this.state = {
+      text:'',
+      taskcounter:0,
+      addingText:false,
+      itemClicked:false,
+      tasks:[{taskText:'ahmad',order:0,opacity:1,subTask:[{text:''}]}]
+    };
   }
-
   updateState(event){
     this.setState({text:event.target.value});
   }
@@ -15,7 +19,6 @@ class Root extends React.Component {
   addTask(){
     var allTask=this.state.tasks;
     let taskData=this.state.tasks[0];
-    //console.log(taskData)
     taskData.taskText=this.state.text;
     taskData.order=this.state.tasks.length;
     taskData.clicked=false;
@@ -27,10 +30,7 @@ class Root extends React.Component {
     this.clearText();
   }
   reOrder(){
-   console.log('its entering');
-
     $("#downArrow").on('click', function(event) {
-
     });
     
     
@@ -39,14 +39,16 @@ class Root extends React.Component {
   hideAllIcon(){
     $('li').on('click',function(event){
       console.log("some label clicked");
+      //setState({itemClicked:this.state.itemClicked});
+      //hide icones
+      //display sub task
     });
   }
   render() {
-    this.hideAllIcon();
     let taskList;
     return (
       <div className="root">
-        <div className="container-fluid">
+        <div className="adding-area container-fluid">
           <div className="row">
             <textarea className="form-control rounded-0 border border-dark text-center text-area-style shadow bg-white"  value={this.state.text} onChange={this.updateState.bind(this)} >
             </textarea>
@@ -56,39 +58,33 @@ class Root extends React.Component {
             <input type="button" className="buttons rounded-0 btn-outline-light text-dark btn-lg border border-dark shadow bg-white" onClick={this.clearText.bind(this)} value="Clear" disabled={this.state.text.length === 0}/>
           </div>
         </div>          
-        
         <div className="display-area">
-          <ul className="list-group itemsList">
-            {
-              
-                 taskList=this.state.tasks.map(i => {
-                      (i>0)
-                      return (
-                              <Task gitClicked={this.state.gitClicked} taskcounter={this.state.taskcounter}  taskDetails={i}  className="task-item"/>
-                      )
-              })
-          }
-          </ul>
+            <ul className="list-group itemsList">
+              {
+                  taskList=this.state.tasks.map((result, i) => {
+                        (i>0)
+                        return (
+                                <Task className="task-item" key={i} taskcounter={this.state.taskcounter} taskText={result.taskText} order={i} opacity={result.opacity} subTasks={result.subTask} />              
+                        )
+                })
+              }             
+            </ul>
         </div>
-        
       </div>
     );
   }
-  
 }
-
 class Task extends React.Component {
-
   constructor(props) {
     super(props);
     this.state = {
-      text:this.props.taskDetails.taskText,
-      order:this.props.taskDetails.order,
-      subTask:this.props.taskDetails.subTask,
-      clicked:this.props.taskDetails.clicked
+      text:this.props.taskText,
+      order:this.props.order,
+      subTask:this.props.subTask,
+      opacity:this.props.opacity,
+      taskcounter:this.props.taskCounter
       };
   }
-
   displaySubTask(){ 
     console.log('its displaying');
     if(this.state.subTask.length>0){
@@ -98,12 +94,10 @@ class Task extends React.Component {
       console.log("there is no subtask");
     }
   }
-
   render() {
     return (
       <li className="list-group-item list-group-item-action list-group-item list-group-item-danger rounded-0 border-0 items">
         {this.state.text}
-        
         {
           (this.props.taskcounter!=this.state.order)?
               <img onClick={this.props.reOrder} src="image/downArrow.png" id="downArrow" className="image" />
@@ -119,20 +113,17 @@ class Task extends React.Component {
     );
   }
 }
-
 class SubTask extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {'text': props.text };
+    this.state = {'text': this.props.text};
   }
-
   render() {
     return (
-      <li className="list-group-item list-group-item-action list-group-item list-group-item-danger rounded-0 border-0 items">
+      <li className="list-group-item list-group-item-action list-group-item list-group-item-danger rounded-0 border-0 sub-item"style={{opacity: this.props.opacity}}>
         {this.state.text}
       </li>
     );
   }
 }
-
 ReactDOM.render(<Root />,document.getElementById('app'));
