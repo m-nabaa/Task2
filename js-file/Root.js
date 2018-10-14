@@ -14,7 +14,7 @@ var Root = function (_React$Component) {
 
     var _this = _possibleConstructorReturn(this, (Root.__proto__ || Object.getPrototypeOf(Root)).call(this, props));
 
-    _this.state = { text: '', addingText: false, tasks: [{ text: '', order: '', subTask: [], clicked: false }] };
+    _this.state = { text: '', 'taskcounter': 0, addingText: false, tasks: [{ 'taskText': 'ahmad', 'order': 0, 'clicked': false, 'subTask': [{ 'text': '' }], 'opacity': 1 }] };
     return _this;
   }
 
@@ -29,35 +29,42 @@ var Root = function (_React$Component) {
       this.setState({ text: '' });
     }
   }, {
-    key: 'addText',
-    value: function addText() {
-      console.log("enter add text");
+    key: 'addTask',
+    value: function addTask() {
+      var allTask = this.state.tasks;
       var taskData = this.state.tasks[0];
-      taskData.text = this.state.text;
+      //console.log(taskData)
+      taskData.taskText = this.state.text;
       taskData.order = this.state.tasks.length;
       taskData.clicked = false;
-
-      //let data="text:"+task+",order:"+order+",clicked:false";
-      console.log(taskData);
-      this.state.tasks.push(taskData);
+      taskData.taskcounter = this.state.tasks.length;
+      taskData.opacity = 1 / this.state.tasks.length;
+      allTask.push(taskData);
+      this.setState({ allTask: this.state.tasks });
+      this.setState({ taskcounter: this.state.taskcounter + 1 });
       this.clearText();
     }
   }, {
-    key: 'mappingTask',
-    value: function mappingTask() {
-      //let details=this.state.tasks;
-      var textList = this.state.tasks.map(function (i) {
-        console.log(i);
+    key: 'reOrder',
+    value: function reOrder() {
+      console.log('its entering');
+
+      $("#downArrow").on('click', function (event) {});
+    }
+  }, {
+    key: 'hideAllIcon',
+    value: function hideAllIcon() {
+      $('li').on('click', function (event) {
+        console.log("some label clicked");
       });
     }
   }, {
     key: 'render',
     value: function render() {
+      var _this2 = this;
 
-      var taskList = this.state.tasks.map(function (i) {
-        return React.createElement(Task, { text: i.text });
-      });
-      console.log(taskList);
+      this.hideAllIcon();
+      var taskList = void 0;
       return React.createElement(
         'div',
         { className: 'root' },
@@ -67,13 +74,13 @@ var Root = function (_React$Component) {
           React.createElement(
             'div',
             { className: 'row' },
-            React.createElement('textarea', { className: 'form-control rounded-0 border border-dark text-center', value: this.state.text, onChange: this.updateState.bind(this) })
+            React.createElement('textarea', { className: 'form-control rounded-0 border border-dark text-center text-area-style shadow bg-white', value: this.state.text, onChange: this.updateState.bind(this) })
           ),
           React.createElement(
             'div',
             { className: 'row' },
-            React.createElement('input', { type: 'button', className: 'button-size rounded-0 btn-outline-light text-dark btn-lg border border-dark', onClick: this.addText.bind(this), value: 'Add Task', disabled: this.state.text.length === 0 }),
-            React.createElement('input', { type: 'button', className: 'button-size rounded-0 btn-outline-light text-dark btn-lg border border-dark', onClick: this.clearText.bind(this), value: 'Clear', disabled: this.state.text.length === 0 })
+            React.createElement('input', { type: 'button', className: 'buttons rounded-0 btn-outline-light text-dark btn-lg border border-dark shadow bg-white', onClick: this.addTask.bind(this), value: 'Add Task', disabled: this.state.text.length === 0 }),
+            React.createElement('input', { type: 'button', className: 'buttons rounded-0 btn-outline-light text-dark btn-lg border border-dark shadow bg-white', onClick: this.clearText.bind(this), value: 'Clear', disabled: this.state.text.length === 0 })
           )
         ),
         React.createElement(
@@ -81,8 +88,11 @@ var Root = function (_React$Component) {
           { className: 'display-area' },
           React.createElement(
             'ul',
-            { className: 'list-group' },
-            taskList
+            { className: 'list-group itemsList' },
+            taskList = this.state.tasks.map(function (i) {
+              i > 0;
+              return React.createElement(Task, { taskcounter: _this2.state.taskcounter, taskDetails: i, className: 'task-item' });
+            })
           )
         )
       );
@@ -98,24 +108,68 @@ var Task = function (_React$Component2) {
   function Task(props) {
     _classCallCheck(this, Task);
 
-    var _this2 = _possibleConstructorReturn(this, (Task.__proto__ || Object.getPrototypeOf(Task)).call(this, props));
+    var _this3 = _possibleConstructorReturn(this, (Task.__proto__ || Object.getPrototypeOf(Task)).call(this, props));
 
-    _this2.state = { 'text': props.text };
-    return _this2;
+    _this3.state = {
+      text: _this3.props.taskDetails.taskText,
+      order: _this3.props.taskDetails.order,
+      subTask: _this3.props.taskDetails.subTask,
+      clicked: _this3.props.taskDetails.clicked
+    };
+    return _this3;
   }
 
   _createClass(Task, [{
+    key: 'displaySubTask',
+    value: function displaySubTask() {
+      console.log('its displaying');
+      if (this.state.subTask.length > 0) {
+        console.log("there is subtask");
+      } else {
+        console.log("there is no subtask");
+      }
+    }
+  }, {
     key: 'render',
     value: function render() {
       return React.createElement(
         'li',
-        { className: 'list-group-item' },
-        this.state.text
+        { className: 'list-group-item list-group-item-action list-group-item list-group-item-danger rounded-0 border-0 items' },
+        this.state.text,
+        this.props.taskcounter != this.state.order ? React.createElement('img', { onClick: this.props.reOrder, src: 'image/downArrow.png', id: 'downArrow', className: 'image' }) : null,
+        this.state.order != 0 ? React.createElement('img', { src: 'image/upArrow.png', className: 'image' }) : null,
+        React.createElement('img', { src: 'image/edit.png', className: 'image' })
       );
     }
   }]);
 
   return Task;
+}(React.Component);
+
+var SubTask = function (_React$Component3) {
+  _inherits(SubTask, _React$Component3);
+
+  function SubTask(props) {
+    _classCallCheck(this, SubTask);
+
+    var _this4 = _possibleConstructorReturn(this, (SubTask.__proto__ || Object.getPrototypeOf(SubTask)).call(this, props));
+
+    _this4.state = { 'text': props.text };
+    return _this4;
+  }
+
+  _createClass(SubTask, [{
+    key: 'render',
+    value: function render() {
+      return React.createElement(
+        'li',
+        { className: 'list-group-item list-group-item-action list-group-item list-group-item-danger rounded-0 border-0 items' },
+        this.state.text
+      );
+    }
+  }]);
+
+  return SubTask;
 }(React.Component);
 
 ReactDOM.render(React.createElement(Root, null), document.getElementById('app'));
