@@ -41,7 +41,9 @@
   "dependencies": {
     "grunt-babel": "^8.0.0",
     "grunt-contrib-less": "^2.0.0",
+    "iscroll-react": "^1.0.3",
     "react": "^16.5.2",
-    "react-dom": "^16.5.2"
+    "react-dom": "^16.5.2",
+    "react-iscroll": "^2.0.3"
   }
 }
