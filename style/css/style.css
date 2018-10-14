@@ -1,5 +1,20 @@
-.button-size {
-  width: 100px;
+.buttons {
+  width: 140px;
   margin-right: 10px;
   margin-top: 10px;
+}
+.text-area-style {
+  height: 70px !important;
+}
+li,
+ul {
+  margin-top: 5px;
+}
+.display-area {
+  height: 300px;
+}
+.image {
+  height: 20px;
+  float: right;
+  margin-right: 5px;
 }
