@@ -4,7 +4,7 @@
   "description": "React",
   "main": "Root.js",
   "scripts": {
-    "it": "babel src -d js-file -w",
+    "it": "babel src -d js -w",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

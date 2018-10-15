@@ -1,25 +1,32 @@
-.buttons {
+.add-task-button,
+.clear-task-button {
   width: 140px;
   margin-right: 10px;
   margin-top: 10px;
 }
-.text-area-style {
+.writing-tasks-area {
   height: 70px !important;
 }
 li,
 ul {
   margin-top: 5px;
 }
-.display-area {
+.tasks-container {
   height: 300px;
   overflow: hidden;
+  padding-top: 5px;
 }
-.image {
+.tasks-icon {
   height: 20px;
   float: right;
   margin-right: 5px;
+  cursor: pointer;
 }
 .sub-item {
-  margin: 10px;
+  margin: 0px;
   margin-left: 50px;
+}
+.root {
+  padding-left: 10px;
+  padding-right: 10px;
 }
