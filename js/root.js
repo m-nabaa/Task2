@@ -16,10 +16,13 @@ var Root = function (_React$Component) {
 
     _this.state = {
       taskText: "",
-      tasks: []
+      tasks: [],
+      test: ""
     };
     return _this;
   }
+  // fully finished
+
 
   _createClass(Root, [{
     key: "componentWillMount",
@@ -29,30 +32,31 @@ var Root = function (_React$Component) {
   }, {
     key: "requestForJson",
     value: function requestForJson() {
+      currentState = this;
       var obj = {
         "status": true,
         "tasks": [{
           "taskText": "ahmad",
           "order": 0,
           "opacity": 1,
-          "currentlyEditing": "false",
-          "editMode": "false",
+          "currentlyEditing": false,
+          "editMode": false,
           "subTask": [{
             "text": ""
           }]
         }, {
           "taskText": "mahmoud",
           "order": 1,
-          "currentlyEditing": "false",
-          "editMode": "false",
+          "currentlyEditing": false,
+          "editMode": false,
           "opacity": .5,
           "subTask": [{
             "text": ""
           }]
         }, {
           "taskText": "hamdan",
-          "currentlyEditing": "false",
-          "editMode": "false",
+          "currentlyEditing": false,
+          "editMode": false,
           "order": 2,
           "opacity": .33,
           "subTask": [{
@@ -60,7 +64,6 @@ var Root = function (_React$Component) {
           }]
         }]
       };
-      currentState = this;
       var data = JSON.stringify(obj);
       $.ajax({
         url: "https://api.myjson.com/bins",
@@ -79,9 +82,6 @@ var Root = function (_React$Component) {
       });
     }
   }, {
-    key: "onEditMode",
-    value: function onEditMode(text, taskOrder) {}
-  }, {
     key: "updateState",
     value: function updateState(event) {
       this.setState({ taskText: event.target.value });
@@ -92,17 +92,11 @@ var Root = function (_React$Component) {
       this.setState({ taskText: "" });
     }
   }, {
-    key: "changeState",
-    value: function changeState(newText) {
-
-      console.log(newText);
-    }
-  }, {
     key: "addTask",
     value: function addTask() {
       prevTasks = currentState.state.tasks;
       //create a new task node currentlyEditing:"false" editMode:"false" opacity: 1 order:0 subTask: Array[1] taskText: "ahmad"
-      var taskData = { text: "", order: 0, subTask: [], currentlyEditing: false, editMode: false };
+      var taskData = { taskText: "", order: 0, subTask: [], currentlyEditing: false, editMode: false };
       taskData.taskText = this.state.taskText;
       taskData.order = this.state.tasks.length;
       taskData.taskcounter = this.state.tasks.length;
@@ -110,6 +104,25 @@ var Root = function (_React$Component) {
       prevTasks.push(taskData);
       this.setState({ tasks: prevTasks });
       this.clearText();
+    }
+    // new child controller
+
+  }, {
+    key: "switchingEditMode",
+    value: function switchingEditMode() {
+      var prevTasks = currentState.state.tasks;
+      prevTasks.map(function (task, i) {
+        task.editMode = !task.editMode;
+      });
+      currentState.setState({ tasks: prevTasks });
+    }
+  }, {
+    key: "updateTasks",
+    value: function updateTasks(newTaskText, index) {
+      currentState.switchingEditMode();
+      var prevTasks = currentState.state.tasks;
+      prevTasks[index].taskText = newTaskText;
+      currentState.setState({ tasks: prevTasks });
     }
   }, {
     key: "render",
@@ -148,7 +161,7 @@ var Root = function (_React$Component) {
             { className: "list-group itemsList" },
             this.state.tasks.map(function (result, i) {
               i >= 0;
-              return React.createElement(Task, { editeProcess: _this2.onEditMode, changeState: _this2.changeState, taskText: result.taskText, key: i, editMode: false, currentlyEditing: false, subTask: result.subTask, order: result.order });
+              return React.createElement(Task, { key: i, index: i, switchToEditMode: _this2.switchingEditMode, updateTasks: _this2.updateTasks, taskText: result.taskText, subTask: result.subTask, editMode: result.editMode });
             })
           )
         )
@@ -168,40 +181,30 @@ var Task = function (_React$Component2) {
     var _this3 = _possibleConstructorReturn(this, (Task.__proto__ || Object.getPrototypeOf(Task)).call(this, props));
 
     _this3.state = {
-      text: _this3.props.taskText,
-      currentlyEditing: _this3.props.currentlyEditing,
-      editMode: _this3.props.editMode,
       subTask: _this3.props.subTask,
-      order: _this3.props.order
+      currentlyEditing: false
     };
-    _this3.oldstate = _this3.state.text;
     return _this3;
   }
 
   _createClass(Task, [{
-    key: "startEditing",
-    value: function startEditing() {
-      console.log("holla");
-      this.setState({ currentlyEditing: true, editMode: true });
-      this.props.editeProcess(this.state.text, this.state.order);
+    key: "changeToEditMode",
+    value: function changeToEditMode() {
+      this.setState({ currentlyEditing: true });
+      this.props.switchToEditMode();
     }
   }, {
-    key: "updateState",
-    value: function updateState(event) {
-      this.setState({ text: event.target.value });
+    key: "cancelUpdate",
+    value: function cancelUpdate() {
+      this.props.switchToEditMode();
+      this.setState({ currentlyEditing: false });
     }
   }, {
-    key: "cancelingUpdates",
-    value: function cancelingUpdates() {
-      this.setState({ text: this.props.taskText });
-      this.setState({ currentlyEditing: false, editMode: false });
-    }
-  }, {
-    key: "updateStateHandler",
-    value: function updateStateHandler() {
-      this.setState({ currentlyEditing: false, editMode: false });
-      this.props.changeState(this.state.text);
-      //call function from parent to handle
+    key: "updateTask",
+    value: function updateTask() {
+      console.log("enter child update");
+      this.props.updateTasks(this.refs.newUpdatedTask.value, this.props.index);
+      this.setState({ currentlyEditing: false });
     }
   }, {
     key: "render",
@@ -217,29 +220,30 @@ var Task = function (_React$Component2) {
           this.state.currentlyEditing ? React.createElement(
             "div",
             { className: "input-group" },
-            React.createElement("input", { type: "text", value: this.state.text, onChange: function onChange() {
-                _this4.updateState(event);
-              }, className: "form-control" }),
+            React.createElement("input", { type: "text", ref: "newUpdatedTask", defaultValue: this.props.taskText, className: "form-control" }),
             React.createElement(
               "div",
               { className: "input-group-append" },
               React.createElement("input", { type: "button", value: "Update", onClick: function onClick() {
-                  _this4.updateStateHandler();
+                  return _this4.updateTask();
                 }, className: "btn btn-success btn-sm cancel" }),
               React.createElement("input", { type: "button", value: "Cancel", onClick: function onClick() {
-                  _this4.cancelingUpdates();
+                  return _this4.cancelUpdate();
                 }, className: "btn btn-danger btn-sm update" })
             )
           ) : React.createElement(
             "div",
             { className: "task-content" },
-            this.state.text
+            this.props.taskText
           ),
-          !this.state.editMode ? React.createElement(
+
+          //console.log(this.props.editMode)
+
+          !this.props.editMode ? React.createElement(
             "div",
             { className: "icons-container" },
             React.createElement("i", { className: "fa fa-pencil text-primary icon", onClick: function onClick() {
-                return _this4.startEditing();
+                return _this4.changeToEditMode();
               } }),
             React.createElement("i", { className: "fa fa-long-arrow-up text-success icon" }),
             React.createElement("i", { className: "fa fa-long-arrow-down text-danger icon" })

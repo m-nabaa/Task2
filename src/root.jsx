@@ -4,13 +4,16 @@ class Root extends React.Component {
     super(props);
     this.state = {
       taskText: "",
-      tasks:[]
+      tasks:[],
+      test:""
     };
   }
+  // fully finished
   componentWillMount() {
     this.requestForJson();
   }
   requestForJson() {
+    currentState = this;
     var obj = {
       "status": true,
       "tasks": [
@@ -18,8 +21,8 @@ class Root extends React.Component {
           "taskText": "ahmad",
           "order": 0,
           "opacity": 1,
-          "currentlyEditing": "false",
-          "editMode": "false",
+          "currentlyEditing": false,
+          "editMode": false,
           "subTask": [
             {
               "text": ""
@@ -29,8 +32,8 @@ class Root extends React.Component {
         {
           "taskText": "mahmoud",
           "order": 1,
-          "currentlyEditing": "false",
-          "editMode": "false",
+          "currentlyEditing": false,
+          "editMode": false,
           "opacity": .5,
           "subTask": [
             {
@@ -40,8 +43,8 @@ class Root extends React.Component {
         },
         {
           "taskText": "hamdan",
-          "currentlyEditing": "false",
-          "editMode": "false",
+          "currentlyEditing": false,
+          "editMode": false,
           "order": 2,
           "opacity": .33,
           "subTask": [
@@ -52,7 +55,6 @@ class Root extends React.Component {
         }
       ]
     }
-    currentState = this;
     var data = JSON.stringify(obj);
     $.ajax({
       url: "https://api.myjson.com/bins",
@@ -70,22 +72,16 @@ class Root extends React.Component {
           }
   });
   }
-  onEditMode(text , taskOrder) {
-  }
   updateState(event) {
     this.setState({taskText : event.target.value});
   }
   clearText() {
     this.setState({taskText : ""});
   }
-  changeState(newText) {
-    
-    console.log(newText);
-  }
   addTask() {
     prevTasks= currentState.state.tasks;
     //create a new task node currentlyEditing:"false" editMode:"false" opacity: 1 order:0 subTask: Array[1] taskText: "ahmad"
-    let taskData= {text:"" , order: 0 , subTask:[], currentlyEditing:false, editMode:false};
+    let taskData= {taskText:"" , order: 0 , subTask:[], currentlyEditing:false, editMode:false};
     taskData.taskText= this.state.taskText;
     taskData.order= this.state.tasks.length;
     taskData.taskcounter= this.state.tasks.length;
@@ -93,6 +89,20 @@ class Root extends React.Component {
     prevTasks.push(taskData);
     this.setState({tasks: prevTasks});
     this.clearText();
+  }
+  // new child controller
+  switchingEditMode() {
+    var prevTasks =currentState.state.tasks;
+    prevTasks.map((task , i) => {
+      task.editMode= !task.editMode;
+    });
+    currentState.setState({tasks: prevTasks});
+  }
+  updateTasks(newTaskText, index) {
+    currentState.switchingEditMode();
+    var prevTasks =currentState.state.tasks;
+    prevTasks[index].taskText= newTaskText;
+    currentState.setState({tasks: prevTasks});
   }
   render() {
     return (
@@ -113,7 +123,7 @@ class Root extends React.Component {
               this.state.tasks.map((result , i) => {
                 (i >= 0)
                 return (
-                  <Task editeProcess= {this.onEditMode} changeState={this.changeState} taskText= {result.taskText} key = {i} editMode= {false} currentlyEditing= {false} subTask= {result.subTask} order= {result.order}/>              
+                  <Task key = {i} index= {i} switchToEditMode= {this.switchingEditMode} updateTasks= {this.updateTasks} taskText= {result.taskText} subTask= {result.subTask} editMode= {result.editMode}/>
                 )
             })
             }  
@@ -127,31 +137,23 @@ class Task extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      text:this.props.taskText,
-      currentlyEditing: this.props.currentlyEditing,
-      editMode:this.props.editMode,
       subTask: this.props.subTask,
-      order: this.props.order
+      currentlyEditing:false
       };
-      this.oldstate=this.state.text;
   }
-  startEditing(){
-    console.log("holla");
-    this.setState({currentlyEditing: true , editMode: true});
-    this.props.editeProcess(this.state.text,this.state.order);
+  changeToEditMode() {
+    this.setState({currentlyEditing: true});
+    this.props.switchToEditMode();
   }
-  updateState(event) {
-    this.setState({text : event.target.value});
+  cancelUpdate() {
+    this.props.switchToEditMode();
+    this.setState({currentlyEditing: false});
+  }
+  updateTask() {
+    console.log("enter child update");
+    this.props.updateTasks(this.refs.newUpdatedTask.value,this.props.index);
+    this.setState({currentlyEditing: false});
 
-  }
-  cancelingUpdates() {
-    this.setState({text : this.props.taskText});
-    this.setState({currentlyEditing: false , editMode: false});
-  }
-  updateStateHandler() {
-    this.setState({currentlyEditing: false , editMode: false});
-    this.props.changeState(this.state.text);
-    //call function from parent to handle
   }
   render() {
     return (
@@ -160,21 +162,23 @@ class Task extends React.Component {
         {
           (this.state.currentlyEditing)? (
             <div className="input-group">
-            <input type="text" value = {this.state.text}  onChange= {() => {this.updateState(event)}} className="form-control" />
+            <input type="text" ref= "newUpdatedTask" defaultValue= {this.props.taskText} className="form-control" />
               <div className="input-group-append">
-                <input type= "button" value= "Update" onClick= {() => {this.updateStateHandler()}} className= "btn btn-success btn-sm cancel" />
-                <input type= "button" value= "Cancel" onClick= {() => {this.cancelingUpdates()}} className= "btn btn-danger btn-sm update"/>
+                <input type= "button" value= "Update" onClick={() => this.updateTask()} className= "btn btn-success btn-sm cancel" />
+                <input type= "button" value= "Cancel" onClick={() => this.cancelUpdate()} className= "btn btn-danger btn-sm update"/>
               </div>
           </div>
           ):
           <div className= "task-content">
-            {this.state.text}
+            {this.props.taskText}
           </div>
         }
         {
-          (!this.state.editMode)?
+          //console.log(this.props.editMode)
+          
+          (!this.props.editMode)?
             <div className= "icons-container">
-              <i className= "fa fa-pencil text-primary icon" onClick={() => this.startEditing()}></i>
+              <i className= "fa fa-pencil text-primary icon" onClick={() => this.changeToEditMode()}></i>
               <i className= "fa fa-long-arrow-up text-success icon"></i>
               <i className= "fa fa-long-arrow-down text-danger icon"></i>
             </div>
