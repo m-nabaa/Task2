@@ -1,0 +1,57 @@
+.main-root {
+  padding: 10px;
+}
+.writing-tasks-area {
+  position: relative;
+  height: 100px;
+  width: 100%;
+}
+.text-container {
+  box-shadow: antiquewhite;
+  box-shadow: 6px 7px rgb(61, 86, 66);
+  display: flex;
+}
+.buttons {
+  padding: 5px;
+  margin-right: 10px;
+  width: 150px;
+  margin-left: 10px;
+  margin-top: 20px;
+}
+.tasks-container {
+  height: 275px;
+  margin: 15px;
+}
+.icon {
+  padding: 5px;
+  cursor: pointer;
+}
+.items {
+  display: flex;
+}
+.buttons {
+  box-shadow: 6px 7px rgb(61, 86, 66);
+}
+.task-content-container {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+.task-content {
+  width: 90%;
+}
+textarea {
+  padding: 30px 0 0 10px;
+}
+li {
+  margin: 5px;
+}
+.cancel {
+  border-radius: 15px 0 0 15px !important;
+}
+.update {
+  border-radius: 0 15px 15px 0 !important;
+}
+.input-group-append {
+  margin: 5px;
+}
