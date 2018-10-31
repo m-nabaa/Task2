@@ -2,60 +2,46 @@
 class Root extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
+    this.state= {
       taskText: "",
-      tasks:[],
-      test:""
+      tasks:[]
     };
   }
-  // fully finished
   componentWillMount() {
     this.requestForJson();
   }
   requestForJson() {
-    currentState = this;
-    var obj = {
+    currentState= this;
+    var obj= {
       "status": true,
       "tasks": [
         {
           "taskText": "ahmad",
           "order": 0,
-          "opacity": 1,
-          "currentlyEditing": false,
           "editMode": false,
           "subTask": [
             {
-              "text": ""
+              "text": "hamed"
             }
           ]
         },
         {
           "taskText": "mahmoud",
           "order": 1,
-          "currentlyEditing": false,
           "editMode": false,
-          "opacity": .5,
           "subTask": [
-            {
-              "text": ""
-            }
           ]
         },
         {
           "taskText": "hamdan",
-          "currentlyEditing": false,
           "editMode": false,
           "order": 2,
-          "opacity": .33,
           "subTask": [
-            {
-              "text": ""
-            }
           ]
         }
       ]
     }
-    var data = JSON.stringify(obj);
+    var data= JSON.stringify(obj);
     $.ajax({
       url: "https://api.myjson.com/bins",
       type: "POST",
@@ -72,25 +58,25 @@ class Root extends React.Component {
           }
   });
   }
+  //header functionality
   updateState(event) {
-    this.setState({taskText : event.target.value});
+    this.setState({taskText: event.target.value});
   }
   clearText() {
-    this.setState({taskText : ""});
+    this.setState({taskText: ""});
   }
   addTask() {
     prevTasks= currentState.state.tasks;
-    //create a new task node currentlyEditing:"false" editMode:"false" opacity: 1 order:0 subTask: Array[1] taskText: "ahmad"
-    let taskData= {taskText:"" , order: 0 , subTask:[], currentlyEditing:false, editMode:false};
+
+    let taskData= {subTask:[], editMode:false};
     taskData.taskText= this.state.taskText;
     taskData.order= this.state.tasks.length;
-    taskData.taskcounter= this.state.tasks.length;
 
     prevTasks.push(taskData);
     this.setState({tasks: prevTasks});
     this.clearText();
   }
-  // new child controller
+  // handling child functionality
   switchingEditMode() {
     var prevTasks =currentState.state.tasks;
     prevTasks.map((task , i) => {
@@ -100,8 +86,28 @@ class Root extends React.Component {
   }
   updateTasks(newTaskText, index) {
     currentState.switchingEditMode();
-    var prevTasks =currentState.state.tasks;
+    var prevTasks= currentState.state.tasks;
     prevTasks[index].taskText= newTaskText;
+    currentState.setState({tasks: prevTasks});
+    currentState.changeTaskOrder();
+  }
+  changeTaskOrder(type, index) {
+    var prevTasks= currentState.state.tasks;
+    switch(type) {
+      case 'up': {
+        prevTasks[index].order -= 1;
+        prevTasks[index-1].order += 1;
+        break;
+      }
+      case 'down': {
+        prevTasks[index].order += 1;
+        prevTasks[index+1].order -= 1;
+        break;
+      }
+      default :
+      break;
+    }
+    prevTasks.sort((a, b) => a.order - b.order);
     currentState.setState({tasks: prevTasks});
   }
   render() {
@@ -113,17 +119,21 @@ class Root extends React.Component {
             </textarea>
           </div>
           <div className= "buttons-container">
-            <input type= "button" value= "Add Task" onClick={() => this.addTask()} className= "btn btn-outline-dark buttons" disabled= {this.state.taskText.length === 0}/>
+            <input type= "button" value= "Add Task" onClick= {() => this.addTask()} className= "btn btn-outline-dark buttons" disabled= {this.state.taskText.length === 0}/>
             <input type= "button" value= "Clear" onClick= {() => {this.clearText()}} className= "btn btn-outline-dark buttons" disabled= {this.state.taskText.length === 0}/>
           </div>
         </div>
         <div className= "tasks-container">
           <ul className= "list-group itemsList">
           {
-              this.state.tasks.map((result , i) => {
+              this.state.tasks.map((result, i) => {
                 (i >= 0)
                 return (
-                  <Task key = {i} index= {i} switchToEditMode= {this.switchingEditMode} updateTasks= {this.updateTasks} taskText= {result.taskText} subTask= {result.subTask} editMode= {result.editMode}/>
+                  <Task key= {i} index= {i} 
+                    changeTaskOrder= {this.changeTaskOrder} switchToEditMode= {this.switchingEditMode} updateTasks= {this.updateTasks} 
+                    taskText= {result.taskText} subTask= {result.subTask} editMode= {result.editMode} order= {result.order} 
+                    tasksLength= {this.state.tasks.length}
+                  />
                 )
             })
             }  
@@ -136,15 +146,22 @@ class Root extends React.Component {
 class Task extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      subTask: this.props.subTask,
-      currentlyEditing:false
+    this.state= {
+      currentlyEditing: false
       };
   }
+// icons functionality 
   changeToEditMode() {
     this.setState({currentlyEditing: true});
     this.props.switchToEditMode();
   }
+  moveTaskUp() {
+    this.props.changeTaskOrder('up',this.props.order);
+  }
+  moveTaskDown() {
+    this.props.changeTaskOrder('down',this.props.order);
+  }
+  //inline updating Tasks
   cancelUpdate() {
     this.props.switchToEditMode();
     this.setState({currentlyEditing: false});
@@ -155,32 +172,44 @@ class Task extends React.Component {
     this.setState({currentlyEditing: false});
 
   }
+
   render() {
     return (
       <li className= "list-group-item list-group-item-action list-group-item-danger d-flex justify-content-between border-0 items">
         <div className= "task-content-container">
         {
-          (this.state.currentlyEditing)? (
-            <div className="input-group">
-            <input type="text" ref= "newUpdatedTask" defaultValue= {this.props.taskText} className="form-control" />
-              <div className="input-group-append">
-                <input type= "button" value= "Update" onClick={() => this.updateTask()} className= "btn btn-success btn-sm cancel" />
-                <input type= "button" value= "Cancel" onClick={() => this.cancelUpdate()} className= "btn btn-danger btn-sm update"/>
-              </div>
-          </div>
-          ):
+          (this.state.currentlyEditing)
+          ? 
+            <div className= "input-group">
+              <input type= "text" ref= "newUpdatedTask" defaultValue= {this.props.taskText} className= "form-control" />
+                <div className= "input-group-append">
+                  <input type= "button" value= "Update" onClick= {() => this.updateTask()} className= "btn btn-success btn-sm cancel" />
+                  <input type= "button" value= "Cancel" onClick= {() => this.cancelUpdate()} className= "btn btn-danger btn-sm update"/>
+                </div>
+            </div>
+          :
           <div className= "task-content">
             {this.props.taskText}
           </div>
         }
         {
-          //console.log(this.props.editMode)
-          
           (!this.props.editMode)?
             <div className= "icons-container">
-              <i className= "fa fa-pencil text-primary icon" onClick={() => this.changeToEditMode()}></i>
-              <i className= "fa fa-long-arrow-up text-success icon"></i>
-              <i className= "fa fa-long-arrow-down text-danger icon"></i>
+              <i onClick={() => this.changeToEditMode()} className= "fa fa-pencil text-primary icon" ></i>
+              {
+                (this.props.order != 0)
+                ?
+                  <i onClick={() => this.moveTaskUp()} className= "fa fa-long-arrow-up text-success icon"></i> 
+                : 
+                null
+              }
+              {
+                (this.props.order!=this.props.tasksLength-1)
+                ?
+                  <i onClick={() => this.moveTaskDown()} className= "fa fa-long-arrow-down text-danger icon"></i> 
+                :
+                null
+              }
             </div>
             :null
         }
