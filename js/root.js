@@ -16,7 +16,8 @@ var Root = function (_React$Component) {
 
     _this.state = {
       taskText: "",
-      tasks: []
+      tasks: [],
+      uri: ""
     };
     return _this;
   }
@@ -25,6 +26,8 @@ var Root = function (_React$Component) {
     key: "componentWillMount",
     value: function componentWillMount() {
       this.requestForJson();
+      // currentState.setCookie("Nabaa", "123", 30);
+
     }
   }, {
     key: "requestForJson",
@@ -36,6 +39,7 @@ var Root = function (_React$Component) {
           "taskText": "ahmad",
           "order": 0,
           "editMode": false,
+          "obesity": 1,
           "subTask": [{
             "text": "hamed"
           }]
@@ -43,11 +47,13 @@ var Root = function (_React$Component) {
           "taskText": "mahmoud",
           "order": 1,
           "editMode": false,
+          "obesity": .5,
           "subTask": []
         }, {
           "taskText": "hamdan",
-          "editMode": false,
           "order": 2,
+          "editMode": false,
+          "obesity": .33,
           "subTask": []
         }]
       };
@@ -59,12 +65,33 @@ var Root = function (_React$Component) {
         contentType: "application/json; charset=utf-8",
         dataType: "json",
         success: function success(data, textStatus, jqXHR) {
+          currentState.setState({ uri: data.uri });
           // load created json
           $.get(data.uri, function (data, textStatus, jqXHR) {
             if (data.status === true) {
               currentState.setState({ tasks: data.tasks });
             }
           });
+        }
+      });
+    }
+  }, {
+    key: "updateJson",
+    value: function updateJson() {
+      var updatedObj = currentState.state.tasks;
+      var data = JSON.stringify(updatedObj);
+      var updatedData = JSON.stringify(updatedObj);
+      $.ajax({
+        url: this.state.uri,
+        type: "PUT",
+        data: updatedData,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function success(data, textStatus, jqXHR) {
+          if (data.status === true) {
+            currentState.setState({ tasks: data.tasks });
+            console.log("it updated corectly");
+          }
         }
       });
     }
@@ -88,10 +115,11 @@ var Root = function (_React$Component) {
       var taskData = { subTask: [], editMode: false };
       taskData.taskText = this.state.taskText;
       taskData.order = this.state.tasks.length;
-
+      taskData.obesity = 1 / (prevTasks.length + 1);
       prevTasks.push(taskData);
       this.setState({ tasks: prevTasks });
       this.clearText();
+      currentState.updateJson();
     }
     // handling child functionality
 
@@ -112,6 +140,7 @@ var Root = function (_React$Component) {
       prevTasks[index].taskText = newTaskText;
       currentState.setState({ tasks: prevTasks });
       currentState.changeTaskOrder();
+      currentState.updateJson();
     }
   }, {
     key: "changeTaskOrder",
@@ -178,7 +207,7 @@ var Root = function (_React$Component) {
               return React.createElement(Task, { key: i, index: i,
                 changeTaskOrder: _this2.changeTaskOrder, switchToEditMode: _this2.switchingEditMode, updateTasks: _this2.updateTasks,
                 taskText: result.taskText, subTask: result.subTask, editMode: result.editMode, order: result.order,
-                tasksLength: _this2.state.tasks.length
+                tasksLength: _this2.state.tasks.length, taskObesity: result.obesity
               });
             })
           )
@@ -244,7 +273,8 @@ var Task = function (_React$Component2) {
 
       return React.createElement(
         "li",
-        { className: "list-group-item list-group-item-action list-group-item-danger d-flex justify-content-between border-0 items" },
+        { className: "list-group-item list-group-item-action d-flex justify-content-between border-0 items",
+          style: { backgroundColor: "hsl(0, 80%, " + (60 + (50 / (this.props.tasksLength - this.props.order) - 13)) + "%)" } },
         React.createElement(
           "div",
           { className: "task-content-container" },

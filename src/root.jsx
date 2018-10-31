@@ -4,11 +4,16 @@ class Root extends React.Component {
     super(props);
     this.state= {
       taskText: "",
-      tasks:[]
+      tasks:[],
+      uri:""
     };
   }
+  
   componentWillMount() {
     this.requestForJson();
+   // currentState.setCookie("Nabaa", "123", 30);
+    
+    
   }
   requestForJson() {
     currentState= this;
@@ -19,6 +24,7 @@ class Root extends React.Component {
           "taskText": "ahmad",
           "order": 0,
           "editMode": false,
+          "obesity": 1,
           "subTask": [
             {
               "text": "hamed"
@@ -29,14 +35,18 @@ class Root extends React.Component {
           "taskText": "mahmoud",
           "order": 1,
           "editMode": false,
+          "obesity": .5,
           "subTask": [
+      
           ]
         },
         {
           "taskText": "hamdan",
-          "editMode": false,
           "order": 2,
+          "editMode": false,
+          "obesity": .33,
           "subTask": [
+      
           ]
         }
       ]
@@ -49,14 +59,33 @@ class Root extends React.Component {
       contentType: "application/json; charset=utf-8",
       dataType: "json",
       success: function (data, textStatus, jqXHR) {
-          // load created json
-          $.get(data.uri, function (data, textStatus, jqXHR) {
+        currentState.setState({uri: data.uri});
+        // load created json
+        $.get(data.uri, function (data, textStatus, jqXHR) {
+          if(data.status === true ){
+            currentState.setState({tasks: data.tasks});
+          }
+        });
+        }
+  });
+  }
+  updateJson() {
+    var updatedObj = currentState.state.tasks;
+    var data = JSON.stringify(updatedObj);
+    var updatedData = JSON.stringify(updatedObj);
+    $.ajax({
+          url: this.state.uri,
+          type: "PUT",
+          data: updatedData,
+          contentType: "application/json; charset=utf-8",
+          dataType: "json",
+          success: function (data, textStatus, jqXHR) {
             if(data.status === true ){
               currentState.setState({tasks: data.tasks});
+             console.log("it updated corectly");
             }
+                }
           });
-          }
-  });
   }
   //header functionality
   updateState(event) {
@@ -71,10 +100,11 @@ class Root extends React.Component {
     let taskData= {subTask:[], editMode:false};
     taskData.taskText= this.state.taskText;
     taskData.order= this.state.tasks.length;
-
+    taskData.obesity= 1/(prevTasks.length+1);
     prevTasks.push(taskData);
     this.setState({tasks: prevTasks});
     this.clearText();
+    currentState.updateJson();
   }
   // handling child functionality
   switchingEditMode() {
@@ -90,6 +120,7 @@ class Root extends React.Component {
     prevTasks[index].taskText= newTaskText;
     currentState.setState({tasks: prevTasks});
     currentState.changeTaskOrder();
+    currentState.updateJson();
   }
   changeTaskOrder(type, index) {
     var prevTasks= currentState.state.tasks;
@@ -132,7 +163,7 @@ class Root extends React.Component {
                   <Task key= {i} index= {i} 
                     changeTaskOrder= {this.changeTaskOrder} switchToEditMode= {this.switchingEditMode} updateTasks= {this.updateTasks} 
                     taskText= {result.taskText} subTask= {result.subTask} editMode= {result.editMode} order= {result.order} 
-                    tasksLength= {this.state.tasks.length}
+                    tasksLength= {this.state.tasks.length} taskObesity= {result.obesity}
                   />
                 )
             })
@@ -174,8 +205,9 @@ class Task extends React.Component {
   }
 
   render() {
-    return (
-      <li className= "list-group-item list-group-item-action list-group-item-danger d-flex justify-content-between border-0 items">
+    return(    
+    <li className= "list-group-item list-group-item-action d-flex justify-content-between border-0 items" 
+    style= {{backgroundColor: `hsl(0, 80%, ${60 + (50 / (this.props.tasksLength - this.props.order )- 13)}%)`}}>
         <div className= "task-content-container">
         {
           (this.state.currentlyEditing)
@@ -215,7 +247,8 @@ class Task extends React.Component {
         }
         </div>
       </li>
-    );
+    )
   }
 }
+
 ReactDOM.render(<Root />,document.getElementById('app'));
