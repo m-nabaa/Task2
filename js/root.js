@@ -16,13 +16,10 @@ var Root = function (_React$Component) {
 
     _this.state = {
       taskText: "",
-      tasks: [],
-      test: ""
+      tasks: []
     };
     return _this;
   }
-  // fully finished
-
 
   _createClass(Root, [{
     key: "componentWillMount",
@@ -38,30 +35,20 @@ var Root = function (_React$Component) {
         "tasks": [{
           "taskText": "ahmad",
           "order": 0,
-          "opacity": 1,
-          "currentlyEditing": false,
           "editMode": false,
           "subTask": [{
-            "text": ""
+            "text": "hamed"
           }]
         }, {
           "taskText": "mahmoud",
           "order": 1,
-          "currentlyEditing": false,
           "editMode": false,
-          "opacity": .5,
-          "subTask": [{
-            "text": ""
-          }]
+          "subTask": []
         }, {
           "taskText": "hamdan",
-          "currentlyEditing": false,
           "editMode": false,
           "order": 2,
-          "opacity": .33,
-          "subTask": [{
-            "text": ""
-          }]
+          "subTask": []
         }]
       };
       var data = JSON.stringify(obj);
@@ -81,6 +68,8 @@ var Root = function (_React$Component) {
         }
       });
     }
+    //header functionality
+
   }, {
     key: "updateState",
     value: function updateState(event) {
@@ -95,17 +84,16 @@ var Root = function (_React$Component) {
     key: "addTask",
     value: function addTask() {
       prevTasks = currentState.state.tasks;
-      //create a new task node currentlyEditing:"false" editMode:"false" opacity: 1 order:0 subTask: Array[1] taskText: "ahmad"
-      var taskData = { taskText: "", order: 0, subTask: [], currentlyEditing: false, editMode: false };
+
+      var taskData = { subTask: [], editMode: false };
       taskData.taskText = this.state.taskText;
       taskData.order = this.state.tasks.length;
-      taskData.taskcounter = this.state.tasks.length;
 
       prevTasks.push(taskData);
       this.setState({ tasks: prevTasks });
       this.clearText();
     }
-    // new child controller
+    // handling child functionality
 
   }, {
     key: "switchingEditMode",
@@ -122,6 +110,32 @@ var Root = function (_React$Component) {
       currentState.switchingEditMode();
       var prevTasks = currentState.state.tasks;
       prevTasks[index].taskText = newTaskText;
+      currentState.setState({ tasks: prevTasks });
+      currentState.changeTaskOrder();
+    }
+  }, {
+    key: "changeTaskOrder",
+    value: function changeTaskOrder(type, index) {
+      var prevTasks = currentState.state.tasks;
+      switch (type) {
+        case 'up':
+          {
+            prevTasks[index].order -= 1;
+            prevTasks[index - 1].order += 1;
+            break;
+          }
+        case 'down':
+          {
+            prevTasks[index].order += 1;
+            prevTasks[index + 1].order -= 1;
+            break;
+          }
+        default:
+          break;
+      }
+      prevTasks.sort(function (a, b) {
+        return a.order - b.order;
+      });
       currentState.setState({ tasks: prevTasks });
     }
   }, {
@@ -161,7 +175,11 @@ var Root = function (_React$Component) {
             { className: "list-group itemsList" },
             this.state.tasks.map(function (result, i) {
               i >= 0;
-              return React.createElement(Task, { key: i, index: i, switchToEditMode: _this2.switchingEditMode, updateTasks: _this2.updateTasks, taskText: result.taskText, subTask: result.subTask, editMode: result.editMode });
+              return React.createElement(Task, { key: i, index: i,
+                changeTaskOrder: _this2.changeTaskOrder, switchToEditMode: _this2.switchingEditMode, updateTasks: _this2.updateTasks,
+                taskText: result.taskText, subTask: result.subTask, editMode: result.editMode, order: result.order,
+                tasksLength: _this2.state.tasks.length
+              });
             })
           )
         )
@@ -181,11 +199,12 @@ var Task = function (_React$Component2) {
     var _this3 = _possibleConstructorReturn(this, (Task.__proto__ || Object.getPrototypeOf(Task)).call(this, props));
 
     _this3.state = {
-      subTask: _this3.props.subTask,
       currentlyEditing: false
     };
     return _this3;
   }
+  // icons functionality 
+
 
   _createClass(Task, [{
     key: "changeToEditMode",
@@ -193,6 +212,18 @@ var Task = function (_React$Component2) {
       this.setState({ currentlyEditing: true });
       this.props.switchToEditMode();
     }
+  }, {
+    key: "moveTaskUp",
+    value: function moveTaskUp() {
+      this.props.changeTaskOrder('up', this.props.order);
+    }
+  }, {
+    key: "moveTaskDown",
+    value: function moveTaskDown() {
+      this.props.changeTaskOrder('down', this.props.order);
+    }
+    //inline updating Tasks
+
   }, {
     key: "cancelUpdate",
     value: function cancelUpdate() {
@@ -236,17 +267,18 @@ var Task = function (_React$Component2) {
             { className: "task-content" },
             this.props.taskText
           ),
-
-          //console.log(this.props.editMode)
-
           !this.props.editMode ? React.createElement(
             "div",
             { className: "icons-container" },
-            React.createElement("i", { className: "fa fa-pencil text-primary icon", onClick: function onClick() {
+            React.createElement("i", { onClick: function onClick() {
                 return _this4.changeToEditMode();
-              } }),
-            React.createElement("i", { className: "fa fa-long-arrow-up text-success icon" }),
-            React.createElement("i", { className: "fa fa-long-arrow-down text-danger icon" })
+              }, className: "fa fa-pencil text-primary icon" }),
+            this.props.order != 0 ? React.createElement("i", { onClick: function onClick() {
+                return _this4.moveTaskUp();
+              }, className: "fa fa-long-arrow-up text-success icon" }) : null,
+            this.props.order != this.props.tasksLength - 1 ? React.createElement("i", { onClick: function onClick() {
+                return _this4.moveTaskDown();
+              }, className: "fa fa-long-arrow-down text-danger icon" }) : null
           ) : null
         )
       );
