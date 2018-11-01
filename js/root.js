@@ -19,15 +19,27 @@ var Root = function (_React$Component) {
       tasks: [],
       uri: ""
     };
+    myScroll = null;
     return _this;
   }
 
   _createClass(Root, [{
     key: "componentWillMount",
     value: function componentWillMount() {
+      // before first render
       this.requestForJson();
-      // currentState.setCookie("Nabaa", "123", 30);
-
+    }
+  }, {
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      // one time after first render
+      myScroll = new IScroll('#wrapper', { mouseWheel: true });
+    }
+  }, {
+    key: "componentDidUpdate",
+    value: function componentDidUpdate() {
+      // whenever any component update
+      myScroll.refresh();
     }
   }, {
     key: "requestForJson",
@@ -42,19 +54,97 @@ var Root = function (_React$Component) {
           "obesity": 1,
           "subTask": [{
             "text": "hamed"
+          }, {
+            "text": "mohammad"
+          }, {
+            "text": "Abu Nabaa"
           }]
         }, {
           "taskText": "mahmoud",
           "order": 1,
           "editMode": false,
-          "obesity": .5,
-          "subTask": []
+          "obesity": 1,
+          "subTask": [{
+            "text": "ali"
+          }, {
+            "text": "Abu Nabaa"
+          }]
         }, {
-          "taskText": "hamdan",
+          "taskText": "ali",
           "order": 2,
           "editMode": false,
-          "obesity": .33,
-          "subTask": []
+          "obesity": 1,
+          "subTask": [{
+            "text": "hamed"
+          }, {
+            "text": "mohammad"
+          }, {
+            "text": "Abu Nabaa"
+          }]
+        }, {
+          "taskText": "hamdan",
+          "order": 3,
+          "editMode": false,
+          "obesity": 1,
+          "subTask": [{
+            "text": "hamed"
+          }]
+        }, {
+          "taskText": "ibrahim",
+          "order": 4,
+          "editMode": false,
+          "obesity": 1,
+          "subTask": [{
+            "text": "Abu Nabaa"
+          }]
+        }, {
+          "taskText": "ziyad",
+          "order": 5,
+          "editMode": false,
+          "obesity": 1,
+          "subTask": [{
+            "text": "Abu Nabaa"
+          }]
+        }, {
+          "taskText": "hassan",
+          "order": 6,
+          "editMode": false,
+          "obesity": 1,
+          "subTask": [{
+            "text": "Abu Nabaa"
+          }]
+        }, {
+          "taskText": "haroun",
+          "order": 7,
+          "editMode": false,
+          "obesity": 1,
+          "subTask": [{
+            "text": "Abu Nabaa"
+          }]
+        }, {
+          "taskText": "sobhi",
+          "order": 8,
+          "editMode": false,
+          "obesity": 1,
+          "subTask": [{
+            "text": "Abu Nabaa"
+          }]
+        }, {
+          "taskText": "yasser",
+          "order": 9,
+          "editMode": false,
+          "obesity": 1,
+          "subTask": [{
+            "text": "Abu Nabaa"
+          }]
+        }, {
+          "taskText": "firas",
+          "order": 10,
+          "editMode": false,
+          "obesity": 1,
+          "subTask": [{
+            "text": "Abu Nabaa"
+          }]
         }]
       };
       var data = JSON.stringify(obj);
@@ -90,7 +180,6 @@ var Root = function (_React$Component) {
         success: function success(data, textStatus, jqXHR) {
           if (data.status === true) {
             currentState.setState({ tasks: data.tasks });
-            console.log("it updated corectly");
           }
         }
       });
@@ -121,7 +210,7 @@ var Root = function (_React$Component) {
       this.clearText();
       currentState.updateJson();
     }
-    // handling child functionality
+    // handling child functionality 
 
   }, {
     key: "switchingEditMode",
@@ -174,10 +263,10 @@ var Root = function (_React$Component) {
 
       return React.createElement(
         "div",
-        { className: "main-root container-fluid" },
+        { className: "main-root" },
         React.createElement(
           "div",
-          { className: "header-container" },
+          { className: "header" },
           React.createElement(
             "div",
             { className: "text-container" },
@@ -198,7 +287,7 @@ var Root = function (_React$Component) {
         ),
         React.createElement(
           "div",
-          { className: "tasks-container" },
+          { className: "task-list-container", id: "wrapper" },
           React.createElement(
             "ul",
             { className: "list-group itemsList" },
@@ -228,7 +317,8 @@ var Task = function (_React$Component2) {
     var _this3 = _possibleConstructorReturn(this, (Task.__proto__ || Object.getPrototypeOf(Task)).call(this, props));
 
     _this3.state = {
-      currentlyEditing: false
+      currentlyEditing: false,
+      displaySubTask: false
     };
     return _this3;
   }
@@ -262,9 +352,16 @@ var Task = function (_React$Component2) {
   }, {
     key: "updateTask",
     value: function updateTask() {
-      console.log("enter child update");
       this.props.updateTasks(this.refs.newUpdatedTask.value, this.props.index);
       this.setState({ currentlyEditing: false });
+    }
+    //show-hide sub tasks
+
+  }, {
+    key: "handleSupTask",
+    value: function handleSupTask() {
+      this.setState({ displaySubTask: !this.state.displaySubTask });
+      this.props.switchToEditMode();
     }
   }, {
     key: "render",
@@ -294,8 +391,17 @@ var Task = function (_React$Component2) {
             )
           ) : React.createElement(
             "div",
-            { className: "task-content" },
-            this.props.taskText
+            { className: "task-content", onClick: function onClick() {
+                return _this4.handleSupTask();
+              } },
+            this.props.taskText,
+            this.state.displaySubTask ? React.createElement(
+              "ul",
+              { className: "list-group itemsList subTaskList" },
+              this.props.subTask.map(function (subs, i) {
+                return React.createElement(SubTask, { key: i, text: subs.text });
+              })
+            ) : null
           ),
           !this.props.editMode ? React.createElement(
             "div",
@@ -316,6 +422,31 @@ var Task = function (_React$Component2) {
   }]);
 
   return Task;
+}(React.Component);
+
+var SubTask = function (_React$Component3) {
+  _inherits(SubTask, _React$Component3);
+
+  function SubTask(props) {
+    _classCallCheck(this, SubTask);
+
+    return _possibleConstructorReturn(this, (SubTask.__proto__ || Object.getPrototypeOf(SubTask)).call(this, props));
+  }
+
+  _createClass(SubTask, [{
+    key: "render",
+    value: function render() {
+      return React.createElement(
+        "li",
+        { className: "list-group-item list-group-item-action list-group-item list-group-item-danger rounded-0 border-0 sub-item items",
+          style: { backgroundColor: "rgb(232, 134, 134)" }
+        },
+        this.props.text
+      );
+    }
+  }]);
+
+  return SubTask;
 }(React.Component);
 
 ReactDOM.render(React.createElement(Root, null), document.getElementById('app'));

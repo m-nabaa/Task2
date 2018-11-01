@@ -1,4 +1,5 @@
 'use strict';
+
 class Root extends React.Component {
   constructor(props) {
     super(props);
@@ -7,13 +8,17 @@ class Root extends React.Component {
       tasks:[],
       uri:""
     };
+    myScroll = null;
   }
   
-  componentWillMount() {
+  componentWillMount() {// before first render
     this.requestForJson();
-   // currentState.setCookie("Nabaa", "123", 30);
-    
-    
+  }
+  componentDidMount() { // one time after first render
+    myScroll = new IScroll('#wrapper',{mouseWheel: true});
+  }
+  componentDidUpdate() {// whenever any component update
+    myScroll.refresh();
   }
   requestForJson() {
     currentState= this;
@@ -28,6 +33,12 @@ class Root extends React.Component {
           "subTask": [
             {
               "text": "hamed"
+            },
+            {
+              "text": "mohammad"
+            },
+            {
+              "text": "Abu Nabaa"
             }
           ]
         },
@@ -35,18 +46,119 @@ class Root extends React.Component {
           "taskText": "mahmoud",
           "order": 1,
           "editMode": false,
-          "obesity": .5,
+          "obesity": 1,
           "subTask": [
-      
+            {
+              "text": "ali"
+            },
+            {
+              "text": "Abu Nabaa"
+            }
+          ]
+        },
+        {
+          "taskText": "ali",
+          "order": 2,
+          "editMode": false,
+          "obesity": 1,
+          "subTask": [
+            {
+              "text": "hamed"
+            },
+            {
+              "text": "mohammad"
+            },
+            {
+              "text": "Abu Nabaa"
+            }
           ]
         },
         {
           "taskText": "hamdan",
-          "order": 2,
+          "order": 3,
           "editMode": false,
-          "obesity": .33,
+          "obesity": 1,
           "subTask": [
-      
+            {
+              "text": "hamed"
+            }
+          ]
+        },
+        {
+          "taskText": "ibrahim",
+          "order": 4,
+          "editMode": false,
+          "obesity": 1,
+          "subTask": [
+            {
+              "text": "Abu Nabaa"
+            }
+          ]
+        },
+        {
+          "taskText": "ziyad",
+          "order": 5,
+          "editMode": false,
+          "obesity": 1,
+          "subTask": [
+            {
+              "text": "Abu Nabaa"
+            }
+          ]
+        },
+        {
+          "taskText": "hassan",
+          "order": 6,
+          "editMode": false,
+          "obesity": 1,
+          "subTask": [
+            {
+              "text": "Abu Nabaa"
+            }
+          ]
+        },
+        {
+          "taskText": "haroun",
+          "order": 7,
+          "editMode": false,
+          "obesity": 1,
+          "subTask": [
+            {
+              "text": "Abu Nabaa"
+            }
+          ]
+        },
+        {
+          "taskText": "sobhi",
+          "order": 8,
+          "editMode": false,
+          "obesity": 1,
+          "subTask": [
+            {
+              "text": "Abu Nabaa"
+            }
+          ]
+        },
+        {
+          "taskText": "yasser",
+          "order": 9,
+          "editMode": false,
+          "obesity": 1,
+          "subTask": [
+            {
+              "text": "Abu Nabaa"
+            }
+          ]
+        },
+        {
+          "taskText": "firas",
+          "order": 10,
+          "editMode": false,
+          "obesity": 1,
+          "subTask": [
+            {
+              "text": "Abu Nabaa"
+            }
           ]
         }
       ]
@@ -82,7 +194,6 @@ class Root extends React.Component {
           success: function (data, textStatus, jqXHR) {
             if(data.status === true ){
               currentState.setState({tasks: data.tasks});
-             console.log("it updated corectly");
             }
                 }
           });
@@ -106,7 +217,7 @@ class Root extends React.Component {
     this.clearText();
     currentState.updateJson();
   }
-  // handling child functionality
+  // handling child functionality 
   switchingEditMode() {
     var prevTasks =currentState.state.tasks;
     prevTasks.map((task , i) => {
@@ -143,20 +254,20 @@ class Root extends React.Component {
   }
   render() {
     return (
-      <div className= "main-root container-fluid">
-        <div className= "header-container">
-          <div className= "text-container">
-            <textarea value= {this.state.taskText} onChange= {() => {this.updateState(event)}} className= "border border-dark shadow bg-white writing-tasks-area">
-            </textarea>
+        <div className= "main-root">
+          <div className= "header">
+            <div className= "text-container">
+              <textarea value= {this.state.taskText} onChange= {() => {this.updateState(event)}} className= "border border-dark shadow bg-white writing-tasks-area">
+              </textarea>
+            </div>
+            <div className= "buttons-container">
+              <input type= "button" value= "Add Task" onClick= {() => this.addTask()} className= "btn btn-outline-dark buttons" disabled= {this.state.taskText.length === 0}/>
+              <input type= "button" value= "Clear" onClick= {() => {this.clearText()}} className= "btn btn-outline-dark buttons" disabled= {this.state.taskText.length === 0}/>
+            </div>
           </div>
-          <div className= "buttons-container">
-            <input type= "button" value= "Add Task" onClick= {() => this.addTask()} className= "btn btn-outline-dark buttons" disabled= {this.state.taskText.length === 0}/>
-            <input type= "button" value= "Clear" onClick= {() => {this.clearText()}} className= "btn btn-outline-dark buttons" disabled= {this.state.taskText.length === 0}/>
-          </div>
-        </div>
-        <div className= "tasks-container">
-          <ul className= "list-group itemsList">
-          {
+          <div className= "task-list-container" id= "wrapper">
+            <ul className= "list-group itemsList">
+            {
               this.state.tasks.map((result, i) => {
                 (i >= 0)
                 return (
@@ -166,11 +277,11 @@ class Root extends React.Component {
                     tasksLength= {this.state.tasks.length} taskObesity= {result.obesity}
                   />
                 )
-            })
-            }  
-          </ul>
+              })
+            }
+            </ul>
         </div>
-      </div>
+        </div>
     );
   }
 }
@@ -178,7 +289,8 @@ class Task extends React.Component {
   constructor(props) {
     super(props);
     this.state= {
-      currentlyEditing: false
+      currentlyEditing: false,
+      displaySubTask: false
       };
   }
 // icons functionality 
@@ -198,14 +310,18 @@ class Task extends React.Component {
     this.setState({currentlyEditing: false});
   }
   updateTask() {
-    console.log("enter child update");
     this.props.updateTasks(this.refs.newUpdatedTask.value,this.props.index);
     this.setState({currentlyEditing: false});
 
   }
+  //show-hide sub tasks
+  handleSupTask(){
+    this.setState({displaySubTask: !this.state.displaySubTask});
+    this.props.switchToEditMode();
+  }
 
   render() {
-    return(    
+    return(
     <li className= "list-group-item list-group-item-action d-flex justify-content-between border-0 items" 
     style= {{backgroundColor: `hsl(0, 80%, ${60 + (50 / (this.props.tasksLength - this.props.order )- 13)}%)`}}>
         <div className= "task-content-container">
@@ -220,8 +336,21 @@ class Task extends React.Component {
                 </div>
             </div>
           :
-          <div className= "task-content">
+          <div className= "task-content" onClick= {() => this.handleSupTask()}>
             {this.props.taskText}
+            {
+              (this.state.displaySubTask)?
+              <ul className= "list-group itemsList subTaskList">
+                {
+                  this.props.subTask.map((subs, i) => {
+                    return (
+                    <SubTask key= {i} text= {subs.text}/>
+                    )
+                  })
+                }
+              </ul>
+              :null
+            }
           </div>
         }
         {
@@ -250,5 +379,18 @@ class Task extends React.Component {
     )
   }
 }
-
+class SubTask extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+  render() {
+    return (
+      <li className= "list-group-item list-group-item-action list-group-item list-group-item-danger rounded-0 border-0 sub-item items"
+      style= {{backgroundColor: `rgb(232, 134, 134)`}}
+      >
+        {this.props.text}
+      </li>
+    );
+  }
+}
 ReactDOM.render(<Root />,document.getElementById('app'));
