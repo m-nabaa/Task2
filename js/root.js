@@ -16,15 +16,30 @@ var Root = function (_React$Component) {
 
     _this.state = {
       taskText: "",
-      tasks: []
+      tasks: [],
+      uri: ""
     };
+    myScroll = null;
     return _this;
   }
 
   _createClass(Root, [{
     key: "componentWillMount",
     value: function componentWillMount() {
+      // before first render
       this.requestForJson();
+    }
+  }, {
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      // one time after first render
+      myScroll = new IScroll('#wrapper', { mouseWheel: true });
+    }
+  }, {
+    key: "componentDidUpdate",
+    value: function componentDidUpdate() {
+      // whenever any component update
+      myScroll.refresh();
     }
   }, {
     key: "requestForJson",
@@ -36,19 +51,100 @@ var Root = function (_React$Component) {
           "taskText": "ahmad",
           "order": 0,
           "editMode": false,
+          "obesity": 1,
           "subTask": [{
             "text": "hamed"
+          }, {
+            "text": "mohammad"
+          }, {
+            "text": "Abu Nabaa"
           }]
         }, {
           "taskText": "mahmoud",
           "order": 1,
           "editMode": false,
-          "subTask": []
+          "obesity": 1,
+          "subTask": [{
+            "text": "ali"
+          }, {
+            "text": "Abu Nabaa"
+          }]
+        }, {
+          "taskText": "ali",
+          "order": 2,
+          "editMode": false,
+          "obesity": 1,
+          "subTask": [{
+            "text": "hamed"
+          }, {
+            "text": "mohammad"
+          }, {
+            "text": "Abu Nabaa"
+          }]
         }, {
           "taskText": "hamdan",
+          "order": 3,
           "editMode": false,
-          "order": 2,
-          "subTask": []
+          "obesity": 1,
+          "subTask": [{
+            "text": "hamed"
+          }]
+        }, {
+          "taskText": "ibrahim",
+          "order": 4,
+          "editMode": false,
+          "obesity": 1,
+          "subTask": [{
+            "text": "Abu Nabaa"
+          }]
+        }, {
+          "taskText": "ziyad",
+          "order": 5,
+          "editMode": false,
+          "obesity": 1,
+          "subTask": [{
+            "text": "Abu Nabaa"
+          }]
+        }, {
+          "taskText": "hassan",
+          "order": 6,
+          "editMode": false,
+          "obesity": 1,
+          "subTask": [{
+            "text": "Abu Nabaa"
+          }]
+        }, {
+          "taskText": "haroun",
+          "order": 7,
+          "editMode": false,
+          "obesity": 1,
+          "subTask": [{
+            "text": "Abu Nabaa"
+          }]
+        }, {
+          "taskText": "sobhi",
+          "order": 8,
+          "editMode": false,
+          "obesity": 1,
+          "subTask": [{
+            "text": "Abu Nabaa"
+          }]
+        }, {
+          "taskText": "yasser",
+          "order": 9,
+          "editMode": false,
+          "obesity": 1,
+          "subTask": [{
+            "text": "Abu Nabaa"
+          }]
+        }, {
+          "taskText": "firas",
+          "order": 10,
+          "editMode": false,
+          "obesity": 1,
+          "subTask": [{
+            "text": "Abu Nabaa"
+          }]
         }]
       };
       var data = JSON.stringify(obj);
@@ -59,12 +155,32 @@ var Root = function (_React$Component) {
         contentType: "application/json; charset=utf-8",
         dataType: "json",
         success: function success(data, textStatus, jqXHR) {
+          currentState.setState({ uri: data.uri });
           // load created json
           $.get(data.uri, function (data, textStatus, jqXHR) {
             if (data.status === true) {
               currentState.setState({ tasks: data.tasks });
             }
           });
+        }
+      });
+    }
+  }, {
+    key: "updateJson",
+    value: function updateJson() {
+      var updatedObj = currentState.state.tasks;
+      var data = JSON.stringify(updatedObj);
+      var updatedData = JSON.stringify(updatedObj);
+      $.ajax({
+        url: this.state.uri,
+        type: "PUT",
+        data: updatedData,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function success(data, textStatus, jqXHR) {
+          if (data.status === true) {
+            currentState.setState({ tasks: data.tasks });
+          }
         }
       });
     }
@@ -88,12 +204,13 @@ var Root = function (_React$Component) {
       var taskData = { subTask: [], editMode: false };
       taskData.taskText = this.state.taskText;
       taskData.order = this.state.tasks.length;
-
+      taskData.obesity = 1 / (prevTasks.length + 1);
       prevTasks.push(taskData);
       this.setState({ tasks: prevTasks });
       this.clearText();
+      currentState.updateJson();
     }
-    // handling child functionality
+    // handling child functionality 
 
   }, {
     key: "switchingEditMode",
@@ -112,10 +229,14 @@ var Root = function (_React$Component) {
       prevTasks[index].taskText = newTaskText;
       currentState.setState({ tasks: prevTasks });
       currentState.changeTaskOrder();
+      currentState.updateJson();
     }
   }, {
     key: "changeTaskOrder",
-    value: function changeTaskOrder(type, index) {
+    value: function changeTaskOrder() {
+      var type = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
+      var index = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+
       var prevTasks = currentState.state.tasks;
       switch (type) {
         case 'up':
@@ -131,6 +252,11 @@ var Root = function (_React$Component) {
             break;
           }
         default:
+          {
+            prevTasks.map(function (result, i) {
+              result.order = i;
+            });
+          }
           break;
       }
       prevTasks.sort(function (a, b) {
@@ -139,22 +265,32 @@ var Root = function (_React$Component) {
       currentState.setState({ tasks: prevTasks });
     }
   }, {
+    key: "removeTask",
+    value: function removeTask(index) {
+      var prevTasks = currentState.state.tasks;
+      prevTasks.splice(index, 1);
+      currentState.changeTaskOrder();
+      currentState.setState({ tasks: prevTasks });
+      currentState.updateJson();
+    }
+  }, {
     key: "render",
     value: function render() {
       var _this2 = this;
 
       return React.createElement(
         "div",
-        { className: "main-root container-fluid" },
+        { className: "main-root" },
         React.createElement(
           "div",
-          { className: "header-container" },
+          { className: "header" },
           React.createElement(
             "div",
             { className: "text-container" },
             React.createElement("textarea", { value: this.state.taskText, onChange: function onChange() {
                 _this2.updateState(event);
-              }, className: "border border-dark shadow bg-white writing-tasks-area" })
+              },
+              className: "writing-tasks-area" })
           ),
           React.createElement(
             "div",
@@ -169,16 +305,16 @@ var Root = function (_React$Component) {
         ),
         React.createElement(
           "div",
-          { className: "tasks-container" },
+          { className: "task-list-container", id: "wrapper" },
           React.createElement(
             "ul",
-            { className: "list-group itemsList" },
+            { className: "list-group itemsList list-try" },
             this.state.tasks.map(function (result, i) {
               i >= 0;
               return React.createElement(Task, { key: i, index: i,
-                changeTaskOrder: _this2.changeTaskOrder, switchToEditMode: _this2.switchingEditMode, updateTasks: _this2.updateTasks,
+                changeTaskOrder: _this2.changeTaskOrder, removeTask: _this2.removeTask, switchToEditMode: _this2.switchingEditMode, updateTasks: _this2.updateTasks,
                 taskText: result.taskText, subTask: result.subTask, editMode: result.editMode, order: result.order,
-                tasksLength: _this2.state.tasks.length
+                tasksLength: _this2.state.tasks.length, taskObesity: result.obesity
               });
             })
           )
@@ -199,7 +335,8 @@ var Task = function (_React$Component2) {
     var _this3 = _possibleConstructorReturn(this, (Task.__proto__ || Object.getPrototypeOf(Task)).call(this, props));
 
     _this3.state = {
-      currentlyEditing: false
+      currentlyEditing: false,
+      displaySubTask: false
     };
     return _this3;
   }
@@ -233,9 +370,21 @@ var Task = function (_React$Component2) {
   }, {
     key: "updateTask",
     value: function updateTask() {
-      console.log("enter child update");
       this.props.updateTasks(this.refs.newUpdatedTask.value, this.props.index);
       this.setState({ currentlyEditing: false });
+    }
+    //show-hide sub tasks
+
+  }, {
+    key: "handleSupTask",
+    value: function handleSupTask() {
+      this.setState({ displaySubTask: !this.state.displaySubTask });
+      this.props.switchToEditMode();
+    }
+  }, {
+    key: "removeTask",
+    value: function removeTask() {
+      this.props.removeTask(this.props.index);
     }
   }, {
     key: "render",
@@ -244,7 +393,8 @@ var Task = function (_React$Component2) {
 
       return React.createElement(
         "li",
-        { className: "list-group-item list-group-item-action list-group-item-danger d-flex justify-content-between border-0 items" },
+        { className: "list-group-item list-group-item-action d-flex justify-content-between border-0 items",
+          style: { background: "hsl(5, 75%, " + (60 + 40 / this.props.tasksLength * this.props.index) + "%)" } /*"lighten(red, 10%)" "red" */ },
         React.createElement(
           "div",
           { className: "task-content-container" },
@@ -254,18 +404,27 @@ var Task = function (_React$Component2) {
             React.createElement("input", { type: "text", ref: "newUpdatedTask", defaultValue: this.props.taskText, className: "form-control" }),
             React.createElement(
               "div",
-              { className: "input-group-append" },
+              { className: "input-group-append update-buttons-container" },
               React.createElement("input", { type: "button", value: "Update", onClick: function onClick() {
                   return _this4.updateTask();
-                }, className: "btn btn-success btn-sm cancel" }),
+                }, className: "btn btn-success btn-sm update" }),
               React.createElement("input", { type: "button", value: "Cancel", onClick: function onClick() {
                   return _this4.cancelUpdate();
-                }, className: "btn btn-danger btn-sm update" })
+                }, className: "btn btn-danger btn-sm cancel" })
             )
           ) : React.createElement(
             "div",
-            { className: "task-content" },
-            this.props.taskText
+            { className: "task-content", onClick: function onClick() {
+                return _this4.handleSupTask();
+              } },
+            this.props.taskText,
+            this.state.displaySubTask ? React.createElement(
+              "ul",
+              { className: "list-group itemsList subTaskList" },
+              this.props.subTask.map(function (subs, i) {
+                return React.createElement(SubTask, { key: i, text: subs.text });
+              })
+            ) : null
           ),
           !this.props.editMode ? React.createElement(
             "div",
@@ -273,6 +432,9 @@ var Task = function (_React$Component2) {
             React.createElement("i", { onClick: function onClick() {
                 return _this4.changeToEditMode();
               }, className: "fa fa-pencil text-primary icon" }),
+            React.createElement("i", { onClick: function onClick() {
+                return _this4.removeTask();
+              }, className: "fa fa-times icon" }),
             this.props.order != 0 ? React.createElement("i", { onClick: function onClick() {
                 return _this4.moveTaskUp();
               }, className: "fa fa-long-arrow-up text-success icon" }) : null,
@@ -286,6 +448,31 @@ var Task = function (_React$Component2) {
   }]);
 
   return Task;
+}(React.Component);
+
+var SubTask = function (_React$Component3) {
+  _inherits(SubTask, _React$Component3);
+
+  function SubTask(props) {
+    _classCallCheck(this, SubTask);
+
+    return _possibleConstructorReturn(this, (SubTask.__proto__ || Object.getPrototypeOf(SubTask)).call(this, props));
+  }
+
+  _createClass(SubTask, [{
+    key: "render",
+    value: function render() {
+      return React.createElement(
+        "li",
+        { className: "list-group-item list-group-item-action list-group-item list-group-item-danger sub-item",
+          style: { backgroundColor: "rgb(232, 134, 134)" }
+        },
+        this.props.text
+      );
+    }
+  }]);
+
+  return SubTask;
 }(React.Component);
 
 ReactDOM.render(React.createElement(Root, null), document.getElementById('app'));
