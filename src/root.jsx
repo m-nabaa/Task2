@@ -1,5 +1,4 @@
 'use strict';
-
 class Root extends React.Component {
   constructor(props) {
     super(props);
@@ -233,7 +232,7 @@ class Root extends React.Component {
     currentState.changeTaskOrder();
     currentState.updateJson();
   }
-  changeTaskOrder(type, index) {
+  changeTaskOrder(type="", index=0) {
     var prevTasks= currentState.state.tasks;
     switch(type) {
       case 'up': {
@@ -246,18 +245,30 @@ class Root extends React.Component {
         prevTasks[index+1].order -= 1;
         break;
       }
-      default :
+      default : {
+        prevTasks.map((result, i) => {
+          result.order=i;
+        });
+      }
       break;
     }
     prevTasks.sort((a, b) => a.order - b.order);
     currentState.setState({tasks: prevTasks});
+  }
+  removeTask(index) {
+    var prevTasks= currentState.state.tasks;
+    prevTasks.splice(index, 1);
+    currentState.changeTaskOrder();
+    currentState.setState({tasks: prevTasks});
+    currentState.updateJson();    
   }
   render() {
     return (
         <div className= "main-root">
           <div className= "header">
             <div className= "text-container">
-              <textarea value= {this.state.taskText} onChange= {() => {this.updateState(event)}} className= "border border-dark shadow bg-white writing-tasks-area">
+              <textarea value= {this.state.taskText} onChange= {() => {this.updateState(event)}} 
+              className= "writing-tasks-area">
               </textarea>
             </div>
             <div className= "buttons-container">
@@ -266,13 +277,13 @@ class Root extends React.Component {
             </div>
           </div>
           <div className= "task-list-container" id= "wrapper">
-            <ul className= "list-group itemsList">
+            <ul className= "list-group itemsList list-try">
             {
               this.state.tasks.map((result, i) => {
                 (i >= 0)
                 return (
                   <Task key= {i} index= {i} 
-                    changeTaskOrder= {this.changeTaskOrder} switchToEditMode= {this.switchingEditMode} updateTasks= {this.updateTasks} 
+                    changeTaskOrder= {this.changeTaskOrder} removeTask= {this.removeTask} switchToEditMode= {this.switchingEditMode} updateTasks= {this.updateTasks} 
                     taskText= {result.taskText} subTask= {result.subTask} editMode= {result.editMode} order= {result.order} 
                     tasksLength= {this.state.tasks.length} taskObesity= {result.obesity}
                   />
@@ -319,20 +330,22 @@ class Task extends React.Component {
     this.setState({displaySubTask: !this.state.displaySubTask});
     this.props.switchToEditMode();
   }
-
+  removeTask() {
+    this.props.removeTask(this.props.index);
+  }
   render() {
     return(
     <li className= "list-group-item list-group-item-action d-flex justify-content-between border-0 items" 
-    style= {{backgroundColor: `hsl(0, 80%, ${60 + (50 / (this.props.tasksLength - this.props.order )- 13)}%)`}}>
+      style= {{background: `hsl(5, 75%, ${60 + ((40 / this.props.tasksLength) * this.props.index)}%)`}}/*"lighten(red, 10%)" "red" */>
         <div className= "task-content-container">
         {
           (this.state.currentlyEditing)
           ? 
             <div className= "input-group">
               <input type= "text" ref= "newUpdatedTask" defaultValue= {this.props.taskText} className= "form-control" />
-                <div className= "input-group-append">
-                  <input type= "button" value= "Update" onClick= {() => this.updateTask()} className= "btn btn-success btn-sm cancel" />
-                  <input type= "button" value= "Cancel" onClick= {() => this.cancelUpdate()} className= "btn btn-danger btn-sm update"/>
+                <div className= "input-group-append update-buttons-container">
+                  <input type= "button" value= "Update" onClick= {() => this.updateTask()} className= "btn btn-success btn-sm update" />
+                  <input type= "button" value= "Cancel" onClick= {() => this.cancelUpdate()} className= "btn btn-danger btn-sm cancel"/>
                 </div>
             </div>
           :
@@ -357,6 +370,7 @@ class Task extends React.Component {
           (!this.props.editMode)?
             <div className= "icons-container">
               <i onClick={() => this.changeToEditMode()} className= "fa fa-pencil text-primary icon" ></i>
+              <i onClick={() => this.removeTask()} className="fa fa-times icon"></i>
               {
                 (this.props.order != 0)
                 ?
@@ -385,7 +399,7 @@ class SubTask extends React.Component {
   }
   render() {
     return (
-      <li className= "list-group-item list-group-item-action list-group-item list-group-item-danger rounded-0 border-0 sub-item items"
+      <li className= "list-group-item list-group-item-action list-group-item list-group-item-danger sub-item"
       style= {{backgroundColor: `rgb(232, 134, 134)`}}
       >
         {this.props.text}
