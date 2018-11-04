@@ -273,6 +273,17 @@ var Root = function (_React$Component) {
       currentState.setState({ tasks: prevTasks });
       currentState.updateJson();
     }
+    //handle subTask functionality
+
+  }, {
+    key: "removeSubTask",
+    value: function removeSubTask(taskIndex, subTaskIndex) {
+      var newTasks = currentState.state.tasks;
+      var newSubTask = newTasks[taskIndex].subTask;
+      newSubTask.splice(subTaskIndex, 1);
+      newTasks.subTask = newSubTask;
+      currentState.setState({ tasks: newTasks });
+    }
   }, {
     key: "render",
     value: function render() {
@@ -312,7 +323,8 @@ var Root = function (_React$Component) {
             this.state.tasks.map(function (result, i) {
               i >= 0;
               return React.createElement(Task, { key: i, index: i,
-                changeTaskOrder: _this2.changeTaskOrder, removeTask: _this2.removeTask, switchToEditMode: _this2.switchingEditMode, updateTasks: _this2.updateTasks,
+                changeTaskOrder: _this2.changeTaskOrder, removeTask: _this2.removeTask, switchToEditMode: _this2.switchingEditMode,
+                updateTasks: _this2.updateTasks, removeSubTask: _this2.removeSubTask,
                 taskText: result.taskText, subTask: result.subTask, editMode: result.editMode, order: result.order,
                 tasksLength: _this2.state.tasks.length, taskObesity: result.obesity
               });
@@ -391,10 +403,13 @@ var Task = function (_React$Component2) {
     value: function render() {
       var _this4 = this;
 
+      backgroundColor = {
+        background: "hsl(5, 75%, " + (60 + 40 / this.props.tasksLength * this.props.index) + "%)"
+      };
       return React.createElement(
         "li",
         { className: "list-group-item list-group-item-action d-flex justify-content-between border-0 items",
-          style: { background: "hsl(5, 75%, " + (60 + 40 / this.props.tasksLength * this.props.index) + "%)" } /*"lighten(red, 10%)" "red" */ },
+          style: backgroundColor },
         React.createElement(
           "div",
           { className: "task-content-container" },
@@ -414,15 +429,19 @@ var Task = function (_React$Component2) {
             )
           ) : React.createElement(
             "div",
-            { className: "task-content", onClick: function onClick() {
-                return _this4.handleSupTask();
-              } },
-            this.props.taskText,
+            { className: "task-content" },
+            React.createElement(
+              "div",
+              { onClick: function onClick() {
+                  return _this4.handleSupTask();
+                }, className: "task-text" },
+              this.props.taskText
+            ),
             this.state.displaySubTask ? React.createElement(
               "ul",
               { className: "list-group itemsList subTaskList" },
               this.props.subTask.map(function (subs, i) {
-                return React.createElement(SubTask, { key: i, text: subs.text });
+                return React.createElement(SubTask, { key: i, text: subs.text, taskIndex: _this4.props.index, index: i, removeSubTask: _this4.props.removeSubTask });
               })
             ) : null
           ),
@@ -462,12 +481,17 @@ var SubTask = function (_React$Component3) {
   _createClass(SubTask, [{
     key: "render",
     value: function render() {
+      var _this6 = this;
+
       return React.createElement(
         "li",
-        { className: "list-group-item list-group-item-action list-group-item list-group-item-danger sub-item",
+        { className: "list-group-item list-group-item-danger sub-item d-flex justify-content-between",
           style: { backgroundColor: "rgb(232, 134, 134)" }
         },
-        this.props.text
+        this.props.text,
+        React.createElement("i", { onClick: function onClick() {
+            return _this6.props.removeSubTask(_this6.props.taskIndex, _this6.props.index);
+          }, className: "fa fa-times icon" })
       );
     }
   }]);

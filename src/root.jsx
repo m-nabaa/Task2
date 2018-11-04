@@ -9,7 +9,6 @@ class Root extends React.Component {
     };
     myScroll = null;
   }
-  
   componentWillMount() {// before first render
     this.requestForJson();
   }
@@ -262,6 +261,14 @@ class Root extends React.Component {
     currentState.setState({tasks: prevTasks});
     currentState.updateJson();    
   }
+  //handle subTask functionality
+  removeSubTask(taskIndex, subTaskIndex) {
+    var newTasks= currentState.state.tasks;
+    var newSubTask= newTasks[taskIndex].subTask;
+    newSubTask.splice(subTaskIndex, 1);
+    newTasks.subTask= newSubTask;
+    currentState.setState({tasks: newTasks});
+  }
   render() {
     return (
         <div className= "main-root">
@@ -283,7 +290,8 @@ class Root extends React.Component {
                 (i >= 0)
                 return (
                   <Task key= {i} index= {i} 
-                    changeTaskOrder= {this.changeTaskOrder} removeTask= {this.removeTask} switchToEditMode= {this.switchingEditMode} updateTasks= {this.updateTasks} 
+                    changeTaskOrder= {this.changeTaskOrder} removeTask= {this.removeTask} switchToEditMode= {this.switchingEditMode} 
+                    updateTasks= {this.updateTasks} removeSubTask= {this.removeSubTask}
                     taskText= {result.taskText} subTask= {result.subTask} editMode= {result.editMode} order= {result.order} 
                     tasksLength= {this.state.tasks.length} taskObesity= {result.obesity}
                   />
@@ -334,9 +342,12 @@ class Task extends React.Component {
     this.props.removeTask(this.props.index);
   }
   render() {
+    backgroundColor= {
+      background: `hsl(5, 75%, ${60 + ((40 / this.props.tasksLength) * this.props.index)}%)`
+    }
     return(
     <li className= "list-group-item list-group-item-action d-flex justify-content-between border-0 items" 
-      style= {{background: `hsl(5, 75%, ${60 + ((40 / this.props.tasksLength) * this.props.index)}%)`}}/*"lighten(red, 10%)" "red" */>
+      style= {backgroundColor}>
         <div className= "task-content-container">
         {
           (this.state.currentlyEditing)
@@ -349,15 +360,18 @@ class Task extends React.Component {
                 </div>
             </div>
           :
-          <div className= "task-content" onClick= {() => this.handleSupTask()}>
-            {this.props.taskText}
+          <div className= "task-content" >
+            <div onClick= {() => this.handleSupTask()} className= "task-text">
+              {this.props.taskText}
+            </div>
+            
             {
               (this.state.displaySubTask)?
               <ul className= "list-group itemsList subTaskList">
                 {
                   this.props.subTask.map((subs, i) => {
                     return (
-                    <SubTask key= {i} text= {subs.text}/>
+                    <SubTask key= {i} text= {subs.text} taskIndex= {this.props.index} index= {i} removeSubTask= {this.props.removeSubTask}/>
                     )
                   })
                 }
@@ -399,10 +413,11 @@ class SubTask extends React.Component {
   }
   render() {
     return (
-      <li className= "list-group-item list-group-item-action list-group-item list-group-item-danger sub-item"
-      style= {{backgroundColor: `rgb(232, 134, 134)`}}
+      <li className= "list-group-item list-group-item-danger sub-item d-flex justify-content-between"
+          style= {{backgroundColor: `rgb(232, 134, 134)`}}
       >
         {this.props.text}
+        <i onClick={() => this.props.removeSubTask(this.props.taskIndex, this.props.index)} className="fa fa-times icon"></i>
       </li>
     );
   }

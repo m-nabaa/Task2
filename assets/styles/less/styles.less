@@ -56,7 +56,9 @@
                 justify-content: space-between;
                 .task-content {
                     width: 85% !important;
-                    cursor: pointer;
+                    .task-text {
+                        cursor: pointer;
+                    }
                     .subTaskList {
                         position: relative;
                         padding: 5px;
@@ -74,11 +76,12 @@
                     font-size: 18px;
                     font-family: monospace;
                 }
+                .icon {
+                    padding: 5px;
+                    cursor: pointer;
+                }
                 .icons-container {
-                    .icon {
-                        padding: 5px;
-                        cursor: pointer;
-                    }
+                    
                     .text-success {
                         color: #2a742d!important;
                     }
