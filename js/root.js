@@ -200,7 +200,6 @@ var Root = function (_React$Component) {
     key: "addTask",
     value: function addTask() {
       prevTasks = currentState.state.tasks;
-
       var taskData = { subTask: [], editMode: false };
       taskData.taskText = this.state.taskText;
       taskData.order = this.state.tasks.length;
@@ -259,8 +258,8 @@ var Root = function (_React$Component) {
           }
           break;
       }
-      prevTasks.sort(function (a, b) {
-        return a.order - b.order;
+      prevTasks.sort(function (first, secound) {
+        return first.order - secound.order;
       });
       currentState.setState({ tasks: prevTasks });
     }
@@ -269,7 +268,7 @@ var Root = function (_React$Component) {
     value: function removeTask(index) {
       var prevTasks = currentState.state.tasks;
       prevTasks.splice(index, 1);
-      currentState.changeTaskOrder();
+      currentState.changeTaskOrder("removing");
       currentState.setState({ tasks: prevTasks });
       currentState.updateJson();
     }
@@ -291,13 +290,13 @@ var Root = function (_React$Component) {
 
       return React.createElement(
         "div",
-        { className: "main-root" },
+        { className: "d-flex justify-content-center main-root" },
         React.createElement(
           "div",
           { className: "header" },
           React.createElement(
             "div",
-            { className: "text-container" },
+            null,
             React.createElement("textarea", { value: this.state.taskText, onChange: function onChange() {
                 _this2.updateState(event);
               },
@@ -305,21 +304,23 @@ var Root = function (_React$Component) {
           ),
           React.createElement(
             "div",
-            { className: "buttons-container" },
+            null,
             React.createElement("input", { type: "button", value: "Add Task", onClick: function onClick() {
                 return _this2.addTask();
-              }, className: "btn btn-outline-dark buttons", disabled: this.state.taskText.length === 0 }),
+              },
+              className: "btn btn-outline-dark header-buttons", disabled: this.state.taskText.length === 0 }),
             React.createElement("input", { type: "button", value: "Clear", onClick: function onClick() {
                 _this2.clearText();
-              }, className: "btn btn-outline-dark buttons", disabled: this.state.taskText.length === 0 })
+              },
+              className: "btn btn-outline-dark header-buttons", disabled: this.state.taskText.length === 0 })
           )
         ),
         React.createElement(
           "div",
-          { className: "task-list-container", id: "wrapper" },
+          { id: "wrapper" },
           React.createElement(
             "ul",
-            { className: "list-group itemsList list-try" },
+            { className: "list-group" },
             this.state.tasks.map(function (result, i) {
               i >= 0;
               return React.createElement(Task, { key: i, index: i,
@@ -408,11 +409,10 @@ var Task = function (_React$Component2) {
       };
       return React.createElement(
         "li",
-        { className: "list-group-item list-group-item-action d-flex justify-content-between border-0 items",
-          style: backgroundColor },
+        { className: "list-group-item items", style: backgroundColor },
         React.createElement(
           "div",
-          { className: "task-content-container" },
+          { className: "task-content-container justify-content-between d-flex" },
           this.state.currentlyEditing ? React.createElement(
             "div",
             { className: "input-group" },
@@ -439,7 +439,7 @@ var Task = function (_React$Component2) {
             ),
             this.state.displaySubTask ? React.createElement(
               "ul",
-              { className: "list-group itemsList subTaskList" },
+              { className: "list-group subTaskList" },
               this.props.subTask.map(function (subs, i) {
                 return React.createElement(SubTask, { key: i, text: subs.text, taskIndex: _this4.props.index, index: i, removeSubTask: _this4.props.removeSubTask });
               })
@@ -447,19 +447,19 @@ var Task = function (_React$Component2) {
           ),
           !this.props.editMode ? React.createElement(
             "div",
-            { className: "icons-container" },
+            null,
             React.createElement("i", { onClick: function onClick() {
                 return _this4.changeToEditMode();
-              }, className: "fa fa-pencil text-primary icon" }),
+              }, className: "fa fa-pencil edit" }),
             React.createElement("i", { onClick: function onClick() {
                 return _this4.removeTask();
-              }, className: "fa fa-times icon" }),
+              }, className: "fa fa-times delete" }),
             this.props.order != 0 ? React.createElement("i", { onClick: function onClick() {
                 return _this4.moveTaskUp();
-              }, className: "fa fa-long-arrow-up text-success icon" }) : null,
+              }, className: "fa fa-long-arrow-up up" }) : null,
             this.props.order != this.props.tasksLength - 1 ? React.createElement("i", { onClick: function onClick() {
                 return _this4.moveTaskDown();
-              }, className: "fa fa-long-arrow-down text-danger icon" }) : null
+              }, className: "fa fa-long-arrow-down down" }) : null
           ) : null
         )
       );
@@ -485,13 +485,13 @@ var SubTask = function (_React$Component3) {
 
       return React.createElement(
         "li",
-        { className: "list-group-item list-group-item-danger sub-item d-flex justify-content-between",
+        { className: "list-group-item sub-item d-flex justify-content-between",
           style: { backgroundColor: "rgb(232, 134, 134)" }
         },
         this.props.text,
         React.createElement("i", { onClick: function onClick() {
             return _this6.props.removeSubTask(_this6.props.taskIndex, _this6.props.index);
-          }, className: "fa fa-times icon" })
+          }, className: "fa fa-times delete" })
       );
     }
   }]);

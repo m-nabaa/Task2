@@ -1,49 +1,33 @@
 .main-root {
     position: absolute;
-    width: 100%;
+    width: 85%;
     height: 650px;
-    background-image: linear-gradient(to top, rgba(220, 195, 195, 0.65), rgba(235, 190, 164, 0.46));
     .header {
         position: absolute;
-        z-index: 2;
         width: 90%;
-        height: 170px;
         top: 10px;
-        left: 5px;
-        .text-container {
-            display: flex;
-            .writing-tasks-area {
-                position: relative;
-                height: 100px;
-                width: 100%;
-                border-radius: 15px;
-                resize: none;
-                padding: 30px 0 0 10px;
-                background-color: #f9f4f4;
-                box-shadow: 6px 7px #dcbcbc;
-                color: #4a4e51;
-              }
-          }
-        .buttons-container {
-            .buttons {
-                padding: 5px;
-                margin-right: 10px;
-                width: 150px;
-                margin-left: 10px;
-                margin-top: 20px;
-                background-color: #dba9a9;
-                box-shadow: 6px 7px #dcbcbc;
-                color: #4a4e51;
-              }
+        .writing-tasks-area {
+            height: 100px;
+            width: 100%;
+            border-radius: 15px;
+            resize: none;
+            padding: 30px 0 0 10px;
+            background-color: #f9f4f4;
+            box-shadow: 6px 7px #dcbcbc;
+            color: #4a4e51;
         }
-      }
-      #wrapper {
+        .header-buttons {
+            width: 150px;
+            margin-left: 10px;
+            margin-top: 20px;
+            background-color: #dba9a9;
+            box-shadow: 6px 7px #dcbcbc;
+            color: #4a4e51;
+        }
+    }
+    #wrapper {
         position: absolute;
-        z-index: 1;
-        padding: 5px;
-        top: 200px;
-        bottom: 0;
-        left: 10;
+        bottom: 10px;
         height: 445px;
         width: 90%;
         overflow: hidden;
@@ -51,56 +35,40 @@
             margin-bottom: 5px;
             border-radius: 20px 20px;
             .task-content-container {
-                width: 100%;
-                display: flex;
-                justify-content: space-between;
                 .task-content {
-                    width: 85% !important;
-                    .task-text {
-                        cursor: pointer;
-                    }
-                    .subTaskList {
-                        position: relative;
-                        padding: 5px;
-                        left: 15px;
-                      }
-                    .sub-item {
-                    border-radius: 20px 20px !important;
-                    margin-bottom: 5px !important;
-                    }
-                  }
-                .task-content {
-                    width: 100%;
                     color: #732020;
-                    text-align: inherit;
                     font-size: 18px;
                     font-family: monospace;
+                    width: 85%;
                 }
-                .icon {
-                    padding: 5px;
+                .task-text {
                     cursor: pointer;
                 }
-                .icons-container {
-                    
-                    .text-success {
-                        color: #2a742d!important;
-                    }
-                    .text-primary {
-                        color: #26239d!important;
-                    }
-                    .text-danger {
-                        color: #ff0000!important;
-                    }
-                    .list-group-item-action {
-                        color: #551212;
-                        text-align: inherit;
+                .subTaskList {
+                    position: relative;
+                    padding: 5px;
+                    left: 15px;
+                    .sub-item {
+                        border-radius: 20px 20px !important;
+                        margin-bottom: 5px !important;
                     }
                 }
-                .cancel {
-                    border-radius: 0 15px 15px 0 !important;
+                .delete {
+                    .icons;
+                    color: #551212;
+                    text-align: inherit;
                 }
-                .update {
-                    border-radius: 15px 0 0 15px !important;
+                .edit {
+                    .icons;
+                    color: #26239d!important;
+                }
+                .up {
+                    .icons;
+                    color: #2a742d!important;
+                }
+                .down {
+                    .icons;
+                    color: #ff0000!important;
                 }
                 .update-buttons-container {
                     padding: 5px;
@@ -108,14 +76,20 @@
                         color: #285e1f;
                         background-color: #47c09e;
                         border: 2px solid #467d53;
+                        border-radius: 15px 0 0 15px !important;
                     }
                     .cancel {
                         color: #572c4f;
                         background-color: #e64444;
                         border: 2px solid #b82230;
-                    }
+                        border-radius: 0 15px 15px 0 !important;
+                    }    
                 }
-              }
-          }
-      }
-  }
+            }
+        }
+    }
+}
+.icons {
+    padding: 5px;
+    cursor: pointer;
+}

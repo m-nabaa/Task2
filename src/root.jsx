@@ -4,16 +4,16 @@ class Root extends React.Component {
     super(props);
     this.state= {
       taskText: "",
-      tasks:[],
-      uri:""
+      tasks: [],
+      uri: ""
     };
-    myScroll = null;
+    myScroll= null;
   }
   componentWillMount() {// before first render
     this.requestForJson();
   }
   componentDidMount() { // one time after first render
-    myScroll = new IScroll('#wrapper',{mouseWheel: true});
+    myScroll= new IScroll('#wrapper', {mouseWheel: true});
   }
   componentDidUpdate() {// whenever any component update
     myScroll.refresh();
@@ -176,13 +176,13 @@ class Root extends React.Component {
             currentState.setState({tasks: data.tasks});
           }
         });
-        }
-  });
+      }
+    });
   }
   updateJson() {
-    var updatedObj = currentState.state.tasks;
-    var data = JSON.stringify(updatedObj);
-    var updatedData = JSON.stringify(updatedObj);
+    var updatedObj= currentState.state.tasks;
+    var data= JSON.stringify(updatedObj);
+    var updatedData= JSON.stringify(updatedObj);
     $.ajax({
           url: this.state.uri,
           type: "PUT",
@@ -193,8 +193,8 @@ class Root extends React.Component {
             if(data.status === true ){
               currentState.setState({tasks: data.tasks});
             }
-                }
-          });
+          }
+    });
   }
   //header functionality
   updateState(event) {
@@ -205,7 +205,6 @@ class Root extends React.Component {
   }
   addTask() {
     prevTasks= currentState.state.tasks;
-
     let taskData= {subTask:[], editMode:false};
     taskData.taskText= this.state.taskText;
     taskData.order= this.state.tasks.length;
@@ -217,8 +216,8 @@ class Root extends React.Component {
   }
   // handling child functionality 
   switchingEditMode() {
-    var prevTasks =currentState.state.tasks;
-    prevTasks.map((task , i) => {
+    var prevTasks= currentState.state.tasks;
+    prevTasks.map((task, i) => {
       task.editMode= !task.editMode;
     });
     currentState.setState({tasks: prevTasks});
@@ -231,7 +230,7 @@ class Root extends React.Component {
     currentState.changeTaskOrder();
     currentState.updateJson();
   }
-  changeTaskOrder(type="", index=0) {
+  changeTaskOrder(type="", index= 0) {
     var prevTasks= currentState.state.tasks;
     switch(type) {
       case 'up': {
@@ -246,18 +245,18 @@ class Root extends React.Component {
       }
       default : {
         prevTasks.map((result, i) => {
-          result.order=i;
+          result.order = i;
         });
       }
       break;
     }
-    prevTasks.sort((a, b) => a.order - b.order);
+    prevTasks.sort((first, secound) => first.order - secound.order);
     currentState.setState({tasks: prevTasks});
   }
   removeTask(index) {
     var prevTasks= currentState.state.tasks;
     prevTasks.splice(index, 1);
-    currentState.changeTaskOrder();
+    currentState.changeTaskOrder("removing");
     currentState.setState({tasks: prevTasks});
     currentState.updateJson();    
   }
@@ -271,20 +270,21 @@ class Root extends React.Component {
   }
   render() {
     return (
-        <div className= "main-root">
+        <div className= "d-flex justify-content-center main-root">
           <div className= "header">
-            <div className= "text-container">
+            <div>
               <textarea value= {this.state.taskText} onChange= {() => {this.updateState(event)}} 
-              className= "writing-tasks-area">
-              </textarea>
+                className= "writing-tasks-area"/>
             </div>
-            <div className= "buttons-container">
-              <input type= "button" value= "Add Task" onClick= {() => this.addTask()} className= "btn btn-outline-dark buttons" disabled= {this.state.taskText.length === 0}/>
-              <input type= "button" value= "Clear" onClick= {() => {this.clearText()}} className= "btn btn-outline-dark buttons" disabled= {this.state.taskText.length === 0}/>
+            <div>
+              <input type= "button" value= "Add Task" onClick= {() => this.addTask()} 
+              className= "btn btn-outline-dark header-buttons" disabled= {this.state.taskText.length === 0}/>
+              <input type= "button" value= "Clear" onClick= {() => {this.clearText()}} 
+              className= "btn btn-outline-dark header-buttons" disabled= {this.state.taskText.length === 0}/>
             </div>
           </div>
-          <div className= "task-list-container" id= "wrapper">
-            <ul className= "list-group itemsList list-try">
+          <div id= "wrapper">
+            <ul className= "list-group">
             {
               this.state.tasks.map((result, i) => {
                 (i >= 0)
@@ -318,10 +318,10 @@ class Task extends React.Component {
     this.props.switchToEditMode();
   }
   moveTaskUp() {
-    this.props.changeTaskOrder('up',this.props.order);
+    this.props.changeTaskOrder('up', this.props.order);
   }
   moveTaskDown() {
-    this.props.changeTaskOrder('down',this.props.order);
+    this.props.changeTaskOrder('down', this.props.order);
   }
   //inline updating Tasks
   cancelUpdate() {
@@ -329,9 +329,8 @@ class Task extends React.Component {
     this.setState({currentlyEditing: false});
   }
   updateTask() {
-    this.props.updateTasks(this.refs.newUpdatedTask.value,this.props.index);
+    this.props.updateTasks(this.refs.newUpdatedTask.value, this.props.index);
     this.setState({currentlyEditing: false});
-
   }
   //show-hide sub tasks
   handleSupTask(){
@@ -346,9 +345,8 @@ class Task extends React.Component {
       background: `hsl(5, 75%, ${60 + ((40 / this.props.tasksLength) * this.props.index)}%)`
     }
     return(
-    <li className= "list-group-item list-group-item-action d-flex justify-content-between border-0 items" 
-      style= {backgroundColor}>
-        <div className= "task-content-container">
+    <li className= "list-group-item items" style= { backgroundColor }>
+      <div className= "task-content-container justify-content-between d-flex">
         {
           (this.state.currentlyEditing)
           ? 
@@ -364,10 +362,10 @@ class Task extends React.Component {
             <div onClick= {() => this.handleSupTask()} className= "task-text">
               {this.props.taskText}
             </div>
-            
             {
-              (this.state.displaySubTask)?
-              <ul className= "list-group itemsList subTaskList">
+              (this.state.displaySubTask)
+              ?
+              <ul className= "list-group subTaskList">
                 {
                   this.props.subTask.map((subs, i) => {
                     return (
@@ -376,34 +374,37 @@ class Task extends React.Component {
                   })
                 }
               </ul>
-              :null
+              :
+              null
             }
           </div>
         }
         {
-          (!this.props.editMode)?
-            <div className= "icons-container">
-              <i onClick={() => this.changeToEditMode()} className= "fa fa-pencil text-primary icon" ></i>
-              <i onClick={() => this.removeTask()} className="fa fa-times icon"></i>
+          (!this.props.editMode)
+          ?
+            <div>
+              <i onClick= {() => this.changeToEditMode()} className= "fa fa-pencil edit"></i>
+              <i onClick= {() => this.removeTask()} className= "fa fa-times delete"></i>
               {
                 (this.props.order != 0)
                 ?
-                  <i onClick={() => this.moveTaskUp()} className= "fa fa-long-arrow-up text-success icon"></i> 
+                  <i onClick= {() => this.moveTaskUp()} className= "fa fa-long-arrow-up up"></i> 
                 : 
                 null
               }
               {
-                (this.props.order!=this.props.tasksLength-1)
+                (this.props.order != this.props.tasksLength - 1)
                 ?
-                  <i onClick={() => this.moveTaskDown()} className= "fa fa-long-arrow-down text-danger icon"></i> 
+                  <i onClick= {() => this.moveTaskDown()} className= "fa fa-long-arrow-down down"></i> 
                 :
                 null
               }
             </div>
-            :null
+          :
+            null
         }
         </div>
-      </li>
+    </li>
     )
   }
 }
@@ -413,11 +414,11 @@ class SubTask extends React.Component {
   }
   render() {
     return (
-      <li className= "list-group-item list-group-item-danger sub-item d-flex justify-content-between"
+      <li className= "list-group-item sub-item d-flex justify-content-between"
           style= {{backgroundColor: `rgb(232, 134, 134)`}}
       >
         {this.props.text}
-        <i onClick={() => this.props.removeSubTask(this.props.taskIndex, this.props.index)} className="fa fa-times icon"></i>
+        <i onClick= {() => this.props.removeSubTask(this.props.taskIndex, this.props.index)} className= "fa fa-times delete"></i>
       </li>
     );
   }
