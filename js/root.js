@@ -27,7 +27,8 @@ var Root = function (_React$Component) {
     key: "componentWillMount",
     value: function componentWillMount() {
       // before first render
-      this.requestForJson();
+      var newUri = this.getCookies("uri");
+      this.requestForJson(newUri);
     }
   }, {
     key: "componentDidMount",
@@ -44,9 +45,10 @@ var Root = function (_React$Component) {
   }, {
     key: "requestForJson",
     value: function requestForJson() {
+      var uri = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
+
       currentState = this;
       var obj = {
-        "status": true,
         "tasks": [{
           "taskText": "ahmad",
           "order": 0,
@@ -145,25 +147,69 @@ var Root = function (_React$Component) {
           "subTask": [{
             "text": "Abu Nabaa"
           }]
-        }]
+        }],
+        "status": true
       };
       var data = JSON.stringify(obj);
-      $.ajax({
-        url: "https://api.myjson.com/bins",
-        type: "POST",
-        data: data,
-        contentType: "application/json; charset=utf-8",
-        dataType: "json",
-        success: function success(data, textStatus, jqXHR) {
-          currentState.setState({ uri: data.uri });
-          // load created json
-          $.get(data.uri, function (data, textStatus, jqXHR) {
-            if (data.status === true) {
-              currentState.setState({ tasks: data.tasks });
-            }
-          });
+      console.log(uri);
+      if (uri == "") {
+        $.ajax({
+          url: "https://api.myjson.com/bins",
+          type: "POST",
+          data: data,
+          contentType: "application/json; charset=utf-8",
+          dataType: "json",
+          success: function success(data, textStatus, jqXHR) {
+            currentState.setState({ uri: data.uri });
+            // load created json
+            $.get(data.uri, function (data, textStatus, jqXHR) {
+              if (data.status === true) {
+                currentState.setState({ tasks: data.tasks });
+                currentState.setCookies('uri', currentState.state.uri);
+              }
+            });
+          }
+        });
+      } else {
+        $.ajax({
+          url: uri,
+          type: "GET",
+          contentType: "application/json; charset=utf-8",
+          dataType: "json",
+          success: function success(data, textStatus, jqXHR) {
+            // load created json
+            $.get(data.uri, function (data, textStatus, jqXHR) {
+              var json = JSON.stringify(data);
+              var x = $("#data").val(json);
+            });
+            currentState.setState({ uri: uri, tasks: data });
+          }
+        });
+      }
+    }
+  }, {
+    key: "setCookies",
+    value: function setCookies(name, value) {
+      var expire = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 7;
+      var path = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : '/;';
+
+      var d = new Date();
+      d.setTime(d.getTime() + expire * 24 * 60 * 60 * 1000);
+      var expires = "expires=" + d.toUTCString();
+      document.cookie = name + "=" + value + ";" + expires + path;
+    }
+  }, {
+    key: "getCookies",
+    value: function getCookies(name) {
+      var cookies = document.cookie.split(";");
+      var wantedCookies = '';
+      cookies.map(function (result, i) {
+        var cookie = result.split("=");
+        if (cookie[0] === name) {
+          wantedCookies = cookie[1];
         }
       });
+      return wantedCookies;
     }
   }, {
     key: "updateJson",
@@ -432,9 +478,9 @@ var Task = function (_React$Component2) {
             { className: "task-content" },
             React.createElement(
               "div",
-              { onClick: function onClick() {
+              { onClick: this.state.displaySubTask && this.props.editMode || !this.state.displaySubTask && !this.props.editMode ? function () {
                   return _this4.handleSupTask();
-                }, className: "task-text" },
+                } : null, className: "task-text" },
               this.props.taskText
             ),
             this.state.displaySubTask ? React.createElement(

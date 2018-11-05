@@ -10,7 +10,8 @@ class Root extends React.Component {
     myScroll= null;
   }
   componentWillMount() {// before first render
-    this.requestForJson();
+    var newUri=this.getCookies("uri");
+    this.requestForJson(newUri);
   }
   componentDidMount() { // one time after first render
     myScroll= new IScroll('#wrapper', {mouseWheel: true});
@@ -18,10 +19,9 @@ class Root extends React.Component {
   componentDidUpdate() {// whenever any component update
     myScroll.refresh();
   }
-  requestForJson() {
+  requestForJson(uri="") {
     currentState= this;
     var obj= {
-      "status": true,
       "tasks": [
         {
           "taskText": "ahmad",
@@ -159,25 +159,64 @@ class Root extends React.Component {
             }
           ]
         }
-      ]
+      ],
+      "status": true
     }
     var data= JSON.stringify(obj);
-    $.ajax({
-      url: "https://api.myjson.com/bins",
-      type: "POST",
-      data: data,
-      contentType: "application/json; charset=utf-8",
-      dataType: "json",
-      success: function (data, textStatus, jqXHR) {
-        currentState.setState({uri: data.uri});
-        // load created json
-        $.get(data.uri, function (data, textStatus, jqXHR) {
-          if(data.status === true ){
-            currentState.setState({tasks: data.tasks});
+    console.log(uri);
+    if(uri == ""){
+        $.ajax({
+          url: "https://api.myjson.com/bins",
+          type: "POST",
+          data: data,
+          contentType: "application/json; charset=utf-8",
+          dataType: "json",
+          success: function (data, textStatus, jqXHR) {
+            currentState.setState({uri: data.uri});
+            // load created json
+            $.get(data.uri, function (data, textStatus, jqXHR) {
+              if(data.status === true ){
+                currentState.setState({tasks: data.tasks});
+                currentState.setCookies('uri',currentState.state.uri);
+
+              }
+            });
           }
         });
-      }
-    });
+    }
+        else {            
+            $.ajax({
+                url: uri,
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data, textStatus, jqXHR) {
+                    // load created json
+                    $.get(data.uri, function (data, textStatus, jqXHR) {
+                        var json = JSON.stringify(data);
+                        var x=$("#data").val(json);
+                    });  
+                    currentState.setState({uri: uri,tasks: data});
+                }
+            });
+        }
+    }
+  setCookies(name, value, expire= 7 ,path= '/;') {
+    var d= new Date();
+    d.setTime(d.getTime() + (expire * 24 * 60 * 60 * 1000));
+    var expires= "expires="+d.toUTCString();
+    document.cookie= name+ "=" +value+ ";" + expires +path;
+  }
+  getCookies(name) {
+      var cookies= document.cookie.split(";");
+      let wantedCookies= '';
+      cookies.map((result, i) => {
+          let cookie=result.split("=");
+          if(cookie[0] === name){
+              wantedCookies= cookie[1];
+          }
+      });
+      return wantedCookies;
   }
   updateJson() {
     var updatedObj= currentState.state.tasks;
@@ -359,7 +398,7 @@ class Task extends React.Component {
             </div>
           :
           <div className= "task-content" >
-            <div onClick= {() => this.handleSupTask()} className= "task-text">
+            <div onClick= {((this.state.displaySubTask && this.props.editMode)|| (!this.state.displaySubTask && !this.props.editMode))?() => this.handleSupTask():null} className= "task-text">
               {this.props.taskText}
             </div>
             {
