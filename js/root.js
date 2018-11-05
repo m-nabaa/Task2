@@ -27,7 +27,8 @@ var Root = function (_React$Component) {
     key: "componentWillMount",
     value: function componentWillMount() {
       // before first render
-      this.requestForJson();
+      var newUri = this.getCookies("uri");
+      this.requestForJson(newUri);
     }
   }, {
     key: "componentDidMount",
@@ -44,9 +45,10 @@ var Root = function (_React$Component) {
   }, {
     key: "requestForJson",
     value: function requestForJson() {
+      var uri = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
+
       currentState = this;
       var obj = {
-        "status": true,
         "tasks": [{
           "taskText": "ahmad",
           "order": 0,
@@ -145,25 +147,69 @@ var Root = function (_React$Component) {
           "subTask": [{
             "text": "Abu Nabaa"
           }]
-        }]
+        }],
+        "status": true
       };
       var data = JSON.stringify(obj);
-      $.ajax({
-        url: "https://api.myjson.com/bins",
-        type: "POST",
-        data: data,
-        contentType: "application/json; charset=utf-8",
-        dataType: "json",
-        success: function success(data, textStatus, jqXHR) {
-          currentState.setState({ uri: data.uri });
-          // load created json
-          $.get(data.uri, function (data, textStatus, jqXHR) {
-            if (data.status === true) {
-              currentState.setState({ tasks: data.tasks });
-            }
-          });
+      console.log(uri);
+      if (uri == "") {
+        $.ajax({
+          url: "https://api.myjson.com/bins",
+          type: "POST",
+          data: data,
+          contentType: "application/json; charset=utf-8",
+          dataType: "json",
+          success: function success(data, textStatus, jqXHR) {
+            currentState.setState({ uri: data.uri });
+            // load created json
+            $.get(data.uri, function (data, textStatus, jqXHR) {
+              if (data.status === true) {
+                currentState.setState({ tasks: data.tasks });
+                currentState.setCookies('uri', currentState.state.uri);
+              }
+            });
+          }
+        });
+      } else {
+        $.ajax({
+          url: uri,
+          type: "GET",
+          contentType: "application/json; charset=utf-8",
+          dataType: "json",
+          success: function success(data, textStatus, jqXHR) {
+            // load created json
+            $.get(data.uri, function (data, textStatus, jqXHR) {
+              var json = JSON.stringify(data);
+              var x = $("#data").val(json);
+            });
+            currentState.setState({ uri: uri, tasks: data });
+          }
+        });
+      }
+    }
+  }, {
+    key: "setCookies",
+    value: function setCookies(name, value) {
+      var expire = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 7;
+      var path = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : '/;';
+
+      var d = new Date();
+      d.setTime(d.getTime() + expire * 24 * 60 * 60 * 1000);
+      var expires = "expires=" + d.toUTCString();
+      document.cookie = name + "=" + value + ";" + expires + path;
+    }
+  }, {
+    key: "getCookies",
+    value: function getCookies(name) {
+      var cookies = document.cookie.split(";");
+      var wantedCookies = '';
+      cookies.map(function (result, i) {
+        var cookie = result.split("=");
+        if (cookie[0] === name) {
+          wantedCookies = cookie[1];
         }
       });
+      return wantedCookies;
     }
   }, {
     key: "updateJson",
@@ -200,7 +246,6 @@ var Root = function (_React$Component) {
     key: "addTask",
     value: function addTask() {
       prevTasks = currentState.state.tasks;
-
       var taskData = { subTask: [], editMode: false };
       taskData.taskText = this.state.taskText;
       taskData.order = this.state.tasks.length;
@@ -259,8 +304,8 @@ var Root = function (_React$Component) {
           }
           break;
       }
-      prevTasks.sort(function (a, b) {
-        return a.order - b.order;
+      prevTasks.sort(function (first, secound) {
+        return first.order - secound.order;
       });
       currentState.setState({ tasks: prevTasks });
     }
@@ -269,9 +314,20 @@ var Root = function (_React$Component) {
     value: function removeTask(index) {
       var prevTasks = currentState.state.tasks;
       prevTasks.splice(index, 1);
-      currentState.changeTaskOrder();
+      currentState.changeTaskOrder("removing");
       currentState.setState({ tasks: prevTasks });
       currentState.updateJson();
+    }
+    //handle subTask functionality
+
+  }, {
+    key: "removeSubTask",
+    value: function removeSubTask(taskIndex, subTaskIndex) {
+      var newTasks = currentState.state.tasks;
+      var newSubTask = newTasks[taskIndex].subTask;
+      newSubTask.splice(subTaskIndex, 1);
+      newTasks.subTask = newSubTask;
+      currentState.setState({ tasks: newTasks });
     }
   }, {
     key: "render",
@@ -280,13 +336,13 @@ var Root = function (_React$Component) {
 
       return React.createElement(
         "div",
-        { className: "main-root" },
+        { className: "d-flex justify-content-center main-root" },
         React.createElement(
           "div",
           { className: "header" },
           React.createElement(
             "div",
-            { className: "text-container" },
+            null,
             React.createElement("textarea", { value: this.state.taskText, onChange: function onChange() {
                 _this2.updateState(event);
               },
@@ -294,25 +350,28 @@ var Root = function (_React$Component) {
           ),
           React.createElement(
             "div",
-            { className: "buttons-container" },
+            null,
             React.createElement("input", { type: "button", value: "Add Task", onClick: function onClick() {
                 return _this2.addTask();
-              }, className: "btn btn-outline-dark buttons", disabled: this.state.taskText.length === 0 }),
+              },
+              className: "btn btn-outline-dark header-buttons", disabled: this.state.taskText.length === 0 }),
             React.createElement("input", { type: "button", value: "Clear", onClick: function onClick() {
                 _this2.clearText();
-              }, className: "btn btn-outline-dark buttons", disabled: this.state.taskText.length === 0 })
+              },
+              className: "btn btn-outline-dark header-buttons", disabled: this.state.taskText.length === 0 })
           )
         ),
         React.createElement(
           "div",
-          { className: "task-list-container", id: "wrapper" },
+          { id: "wrapper" },
           React.createElement(
             "ul",
-            { className: "list-group itemsList list-try" },
+            { className: "list-group" },
             this.state.tasks.map(function (result, i) {
               i >= 0;
               return React.createElement(Task, { key: i, index: i,
-                changeTaskOrder: _this2.changeTaskOrder, removeTask: _this2.removeTask, switchToEditMode: _this2.switchingEditMode, updateTasks: _this2.updateTasks,
+                changeTaskOrder: _this2.changeTaskOrder, removeTask: _this2.removeTask, switchToEditMode: _this2.switchingEditMode,
+                updateTasks: _this2.updateTasks, removeSubTask: _this2.removeSubTask,
                 taskText: result.taskText, subTask: result.subTask, editMode: result.editMode, order: result.order,
                 tasksLength: _this2.state.tasks.length, taskObesity: result.obesity
               });
@@ -391,13 +450,15 @@ var Task = function (_React$Component2) {
     value: function render() {
       var _this4 = this;
 
+      backgroundColor = {
+        background: "hsl(5, 75%, " + (60 + 40 / this.props.tasksLength * this.props.index) + "%)"
+      };
       return React.createElement(
         "li",
-        { className: "list-group-item list-group-item-action d-flex justify-content-between border-0 items",
-          style: { background: "hsl(5, 75%, " + (60 + 40 / this.props.tasksLength * this.props.index) + "%)" } /*"lighten(red, 10%)" "red" */ },
+        { className: "list-group-item items", style: backgroundColor },
         React.createElement(
           "div",
-          { className: "task-content-container" },
+          { className: "task-content-container justify-content-between d-flex" },
           this.state.currentlyEditing ? React.createElement(
             "div",
             { className: "input-group" },
@@ -414,33 +475,37 @@ var Task = function (_React$Component2) {
             )
           ) : React.createElement(
             "div",
-            { className: "task-content", onClick: function onClick() {
-                return _this4.handleSupTask();
-              } },
-            this.props.taskText,
+            { className: "task-content" },
+            React.createElement(
+              "div",
+              { onClick: this.state.displaySubTask && this.props.editMode || !this.state.displaySubTask && !this.props.editMode ? function () {
+                  return _this4.handleSupTask();
+                } : null, className: "task-text" },
+              this.props.taskText
+            ),
             this.state.displaySubTask ? React.createElement(
               "ul",
-              { className: "list-group itemsList subTaskList" },
+              { className: "list-group subTaskList" },
               this.props.subTask.map(function (subs, i) {
-                return React.createElement(SubTask, { key: i, text: subs.text });
+                return React.createElement(SubTask, { key: i, text: subs.text, taskIndex: _this4.props.index, index: i, removeSubTask: _this4.props.removeSubTask });
               })
             ) : null
           ),
           !this.props.editMode ? React.createElement(
             "div",
-            { className: "icons-container" },
+            null,
             React.createElement("i", { onClick: function onClick() {
                 return _this4.changeToEditMode();
-              }, className: "fa fa-pencil text-primary icon" }),
+              }, className: "fa fa-pencil edit" }),
             React.createElement("i", { onClick: function onClick() {
                 return _this4.removeTask();
-              }, className: "fa fa-times icon" }),
+              }, className: "fa fa-times delete" }),
             this.props.order != 0 ? React.createElement("i", { onClick: function onClick() {
                 return _this4.moveTaskUp();
-              }, className: "fa fa-long-arrow-up text-success icon" }) : null,
+              }, className: "fa fa-long-arrow-up up" }) : null,
             this.props.order != this.props.tasksLength - 1 ? React.createElement("i", { onClick: function onClick() {
                 return _this4.moveTaskDown();
-              }, className: "fa fa-long-arrow-down text-danger icon" }) : null
+              }, className: "fa fa-long-arrow-down down" }) : null
           ) : null
         )
       );
@@ -462,12 +527,17 @@ var SubTask = function (_React$Component3) {
   _createClass(SubTask, [{
     key: "render",
     value: function render() {
+      var _this6 = this;
+
       return React.createElement(
         "li",
-        { className: "list-group-item list-group-item-action list-group-item list-group-item-danger sub-item",
+        { className: "list-group-item sub-item d-flex justify-content-between",
           style: { backgroundColor: "rgb(232, 134, 134)" }
         },
-        this.props.text
+        this.props.text,
+        React.createElement("i", { onClick: function onClick() {
+            return _this6.props.removeSubTask(_this6.props.taskIndex, _this6.props.index);
+          }, className: "fa fa-times delete" })
       );
     }
   }]);
